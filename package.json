@@ -23,6 +23,7 @@
   "dependencies": {
     "@discordjs/voice": "^0.16.1",
     "discord.js": "^14.14.1",
-    "dotenv": "^16.4.4"
+    "dotenv": "^16.4.4",
+    "libsodium-wrappers": "^0.7.13"
   }
 }
