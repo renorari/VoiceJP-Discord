@@ -1,8 +1,8 @@
 /* VoiceJP Main Script */
 import fs from "node:fs";
 import path from "node:path";
-import { StreamType, createAudioPlayer, createAudioResource, joinVoiceChannel } from "@discordjs/voice";
-import { REST, Routes, Client, IntentsBitField, SlashCommandBuilder, Colors, ActivityType, PermissionFlagsBits, SlashCommandSubcommandBuilder, SlashCommandStringOption, SlashCommandChannelOption, ChannelType, Message, ChatInputCommandInteraction } from "discord.js";
+import { AudioPlayer, StreamType, VoiceConnection, VoiceConnectionStatus, createAudioPlayer, createAudioResource, joinVoiceChannel } from "@discordjs/voice";
+import { REST, Routes, Client, IntentsBitField, SlashCommandBuilder, Colors, ActivityType, PermissionFlagsBits, SlashCommandSubcommandBuilder, SlashCommandStringOption, SlashCommandChannelOption, ChannelType, Message, ChatInputCommandInteraction, BaseGuildVoiceChannel, VoiceChannel, GuildBasedChannel, Collection, GuildMember } from "discord.js";
 import dotenv from "dotenv";
 import { generateVoice } from "./speech";
 dotenv.config();
@@ -17,12 +17,14 @@ if (!fs.existsSync(path.join(__dirname, "temp"))) {
 
 const voiceModels = JSON.parse(fs.readFileSync(path.join(__dirname, "voice_models/models.json"), "utf-8"));
 const token = process.env.TOKEN as string;
-const client = new Client({ intents: [
-    IntentsBitField.Flags.Guilds,
-    IntentsBitField.Flags.GuildMessages,
-    IntentsBitField.Flags.GuildVoiceStates,
-    IntentsBitField.Flags.MessageContent
-]});
+const client = new Client({
+    intents: [
+        IntentsBitField.Flags.Guilds,
+        IntentsBitField.Flags.GuildMessages,
+        IntentsBitField.Flags.GuildVoiceStates,
+        IntentsBitField.Flags.MessageContent
+    ]
+});
 const restClient = new REST({ version: "10" }).setToken(token);
 
 const voiceChannels = new Map();
@@ -77,7 +79,7 @@ client.on("ready", async () => {
                                     .setName("voice-id")
                                     .setDescription("set voice id.")
                                     .setDescriptionLocalization("ja", "音声IDを設定します。")
-                                    .setChoices(...voiceModels.map((voiceModel: { id: string; name: string; }) => ({value: voiceModel.id, name: voiceModel.name})))
+                                    .setChoices(...voiceModels.map((voiceModel: { id: string; name: string; }) => ({ value: voiceModel.id, name: voiceModel.name })))
                             )
                             .addStringOption(
                                 new SlashCommandStringOption()
@@ -126,9 +128,9 @@ client.on("interactionCreate", async interaction => {
         await interaction.reply("申し訳ございませんが、DMでは使用できません。");
         return;
     }
-    let channel;
-    let connection;
-    let player;
+    let channel: BaseGuildVoiceChannel | VoiceChannel | GuildBasedChannel | null | undefined;
+    let connection: VoiceConnection;
+    let player: AudioPlayer;
     let voiceModel: { id: string; file: string; name: string; };
     let onMessageCreate;
     switch (interaction.commandName) {
@@ -193,6 +195,15 @@ client.on("interactionCreate", async interaction => {
         player = createAudioPlayer();
         connection.subscribe(player);
         voiceChannels.set(interaction.guildId as string, { connection, player });
+        connection.on(VoiceConnectionStatus.Ready, () => {
+            voiceChannels.get(interaction.guildId as string).checker = setInterval(() => {
+                if ((channel?.members as Collection<string, GuildMember>).size <= 1) {
+                    connection.destroy();
+                    clearInterval(voiceChannels.get(interaction.guildId as string).checker);
+                    voiceChannels.delete(interaction.guildId as string);
+                }
+            });
+        });
         await interaction.reply({
             "content": "ボイスチャンネルに参加しました。",
             "embeds": [{
