@@ -181,6 +181,18 @@ client.on("interactionCreate", async interaction => {
             });
             return;
         }
+        if ((channel?.members as Collection<string, GuildMember>).size <= 1) {
+            await interaction.reply({
+                "content": "エラーが発生しました。",
+                "embeds": [{
+                    "title": "エラー",
+                    "description": "ボイスチャンネルに誰もいません。",
+                    "color": Colors.Red
+                }],
+                "ephemeral": true
+            });
+            return;
+        }
         if (voiceChannels.has(interaction.guildId as string)) {
             voiceChannels.get(interaction.guildId as string).connection.destroy();
             voiceChannels.delete(interaction.guildId as string);
