@@ -134,3 +134,7 @@ voice_models
 
 # vosk model
 vosk_models
+
+# temp files
+temp/
+temp/*
