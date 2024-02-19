@@ -288,7 +288,6 @@ client.on("interactionCreate", async interaction => {
             }
             onMessageCreate = async (message: Message) => {
                 if (message.author.bot) return;
-                if (message.channel.type !== ChannelType.GuildText) return;
                 if (message.channel.id !== voiceChannels.get(interaction.guildId as string)?.synthesis?.channel) return;
                 if (message.content.length > 100 || message.content == "") return;
                 const filePath = path.join(__dirname, "temp", `${message.id}`);
