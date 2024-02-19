@@ -336,6 +336,6 @@ client.on("interactionCreate", async interaction => {
 
 client.login(token);
 
-process.on("unhandledRejection", (error) => {
-    console.error("Unhandled promise rejection:", error);
+process.on("uncaughtException", function (error) {
+    console.error(error);
 });
