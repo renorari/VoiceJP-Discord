@@ -263,15 +263,17 @@ client.on("interactionCreate", async interaction => {
             if (voiceChannels.get(interaction.guildId as string).synthesis) {
                 client.off("messageCreate", voiceChannels.get(interaction.guildId as string).synthesis.messageCreate);
                 voiceChannels.get(interaction.guildId as string).synthesis = null;
-                await interaction.reply({
-                    "content": "音声合成を解除しました。",
-                    "embeds": [{
-                        "title": "音声合成",
-                        "description": "音声合成を解除しました。",
-                        "color": Colors.Green
-                    }]
-                });
-                return;
+                if (!interaction.options.get("voice-id")?.value && !interaction.options.get("speed")?.value && !interaction.options.get("tone")?.value && !interaction.options.get("intonation")?.value && !interaction.options.get("volume")?.value) {
+                    await interaction.reply({
+                        "content": "音声合成を解除しました。",
+                        "embeds": [{
+                            "title": "音声合成",
+                            "description": "音声合成を解除しました。",
+                            "color": Colors.Green
+                        }]
+                    });
+                    return;
+                }
             }
             voiceModel = voiceModels.find((voiceModel: { id: string; }) => voiceModel.id === (interaction.options.get("voice-id")?.value ?? "voicea"));
             if (!voiceModel) {
