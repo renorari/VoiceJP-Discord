@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { AudioPlayer, StreamType, VoiceConnection, VoiceConnectionStatus, createAudioPlayer, createAudioResource, joinVoiceChannel } from "@discordjs/voice";
-import { REST, Routes, Client, IntentsBitField, SlashCommandBuilder, Colors, ActivityType, PermissionFlagsBits, SlashCommandSubcommandBuilder, SlashCommandStringOption, SlashCommandChannelOption, ChannelType, Message, ChatInputCommandInteraction, BaseGuildVoiceChannel, VoiceChannel, GuildBasedChannel, Collection, GuildMember } from "discord.js";
+import { REST, Routes, Client, IntentsBitField, SlashCommandBuilder, Colors, ActivityType, PermissionFlagsBits, SlashCommandSubcommandBuilder, SlashCommandStringOption, SlashCommandChannelOption, ChannelType, Message, ChatInputCommandInteraction, BaseGuildVoiceChannel, VoiceChannel, GuildBasedChannel, Collection, GuildMember, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import dotenv from "dotenv";
 import { generateVoice } from "./speech";
 dotenv.config();
@@ -27,6 +27,77 @@ const client = new Client({
 });
 const restClient = new REST({ version: "10" }).setToken(token);
 
+const helpPages = [
+    new EmbedBuilder()
+        .setTitle("使い方")
+        .setDescription("VoiceJPをお使いいただきありがとうございます。\nVoiceJPでは、日本語で音声読み上げと文字起こしができます。\n\n詳しい使用方法は、次のページをご覧ください。")
+        .setColor(Colors.LuminousVividPink)
+        .setFooter({
+            "text": "VoiceJP 使い方 1/5"
+        }),
+    new EmbedBuilder()
+        .setTitle("使い方 - コマンド")
+        .setDescription("VoiceJPには、シンプルで簡単なコマンドが4つあります。\nこのページでは、VoiceJPをボイスチャットに入れる方法について説明します。")
+        .setColor(Colors.LuminousVividPink)
+        .setFields(
+            {
+                "name": "/join",
+                "value": "このコマンドを使用して、VoiceJPをボイスチャットに入れることができます。"
+            },
+            {
+                "name": "/leave",
+                "value": "このコマンドを使用して、VoiceJPをボイスチャットから出すことができます。"
+            })
+        .setFooter({
+            "text": "VoiceJP 使い方 2/5"
+        }),
+    new EmbedBuilder()
+        .setTitle("使い方 - 音声読み上げ")
+        .setDescription("VoiceJPでは、聞き専のための読み上げを行うことができます。\nこのページでは、音声読み上げについて説明します。")
+        .setColor(Colors.LuminousVividPink)
+        .setFields(
+            {
+                "name": "/speech synthesis",
+                "value": "このコマンドを使用して、音声読み上げを設定することができます。"
+            },
+            {
+                "name": "/speech synthesis voice-id",
+                "value": "音声IDを設定します。\nデフォルトでは、KanaVoiceのVoiceAが設定されています。"
+            },
+            {
+                "name": "/speech synthesis speed",
+                "value": "速度を設定します。\nデフォルトでは、1.25が設定されています。"
+            },
+            {
+                "name": "/speech synthesis tone",
+                "value": "音程を設定します。この設定では、声の高さが変わります。\nデフォルトでは、1が設定されています。"
+            },
+            {
+                "name": "/speech synthesis intonation",
+                "value": "抑揚を設定します。この設定では、声の抑揚が変わります。\nデフォルトでは、1が設定されています。"
+            },
+            {
+                "name": "/speech synthesis volume",
+                "value": "音量を設定します。\nデフォルトでは、-6dBが設定されています。"
+            })
+        .setFooter({
+            "text": "VoiceJP 使い方 3/5"
+        }),
+    new EmbedBuilder()
+        .setTitle("使い方 - 音声認識")
+        .setDescription("VoiceJPの文字起こし機能は、開発中です。\n2024年4月ごろまでの完成を目指しています。")
+        .setColor(Colors.LuminousVividPink)
+        .setFooter({
+            "text": "VoiceJP 使い方 4/5"
+        }),
+    new EmbedBuilder()
+        .setTitle("使い方 - おわり")
+        .setDescription("VoiceJPの使い方は以上です。\n何かご不明な点がございましたら、[開発者Discordサーバー](https://discord.gg/VSHknmX7C4)にお問い合わせください。")
+        .setColor(Colors.LuminousVividPink)
+        .setFooter({
+            "text": "VoiceJP 使い方 5/5"
+        })
+];
 const voiceChannels = new Map();
 
 function setActivity() {
@@ -45,6 +116,10 @@ client.on("ready", async () => {
                     .setName("ping")
                     .setDescription("Replies with Pong!")
                     .setDescriptionLocalization("ja", "Pong! と返信します。"),
+                new SlashCommandBuilder()
+                    .setName("help")
+                    .setDescription("Shows help.")
+                    .setDescriptionLocalization("ja", "ヘルプを表示します。"),
                 new SlashCommandBuilder()
                     .setName("join")
                     .setDescription("Joins the voice channel.")
@@ -142,6 +217,26 @@ client.on("interactionCreate", async interaction => {
                 description: `レイテンシ: ${client.ws.ping}m秒`,
                 color: Colors.LuminousVividPink
             }]
+        });
+        break;
+    case "help":
+        await interaction.reply({
+            content: "VoiceJPの使い方を表示します。",
+            embeds: [helpPages[0]],
+            components: [
+                new ActionRowBuilder<ButtonBuilder>()
+                    .addComponents(
+                        new ButtonBuilder()
+                            .setCustomId("help-0")
+                            .setLabel("前へ")
+                            .setStyle(ButtonStyle.Primary)
+                            .setDisabled(true),
+                        new ButtonBuilder()
+                            .setCustomId("help-1")
+                            .setLabel("次へ")
+                            .setStyle(ButtonStyle.Primary)
+                    )
+            ]
         });
         break;
     case "join":
@@ -331,6 +426,32 @@ client.on("interactionCreate", async interaction => {
             break;
         }
         break;
+    }
+});
+
+client.on("interactionCreate", async interaction => {
+    if (!interaction.isButton()) return;
+    if (interaction.customId.startsWith("help-")) {
+        const page = Number(interaction.customId.split("-")[1]);
+        await interaction.update({
+            content: "VoiceJPの使い方を表示します。",
+            embeds: [helpPages[page]],
+            components: [
+                new ActionRowBuilder<ButtonBuilder>()
+                    .addComponents(
+                        new ButtonBuilder()
+                            .setCustomId(`help-${page - 1}`)
+                            .setLabel("前へ")
+                            .setStyle(ButtonStyle.Primary)
+                            .setDisabled(page === 0),
+                        new ButtonBuilder()
+                            .setCustomId(`help-${page + 1}`)
+                            .setLabel("次へ")
+                            .setStyle(ButtonStyle.Primary)
+                            .setDisabled(page === helpPages.length - 1)
+                    )
+            ]
+        });
     }
 });
 
