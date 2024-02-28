@@ -83,7 +83,7 @@ const helpPages = [
                 },
                 {
                     "name": `</speech synthesis:${(await client.application?.commands.fetch())?.find((command) => command.name === "speech")?.id}> volume:`,
-                    "value": "音量を設定します。\nデフォルトでは、-6dBが設定されています。"
+                    "value": "音量を設定します。\nデフォルトでは、0dBが設定されています。"
                 })
             .setFooter({
                 "text": "VoiceJP 使い方 3/5"
@@ -422,7 +422,7 @@ client.on("interactionCreate", async interaction => {
                 "speed": interaction.options.get("speed")?.value as number ?? 1.25,
                 "tone": interaction.options.get("tone")?.value as number ?? 1,
                 "intonation": interaction.options.get("intonation")?.value as number ?? 1,
-                "volume": interaction.options.get("volume")?.value as number ?? -6,
+                "volume": interaction.options.get("volume")?.value as number ?? 0,
                 "messageCreate": onMessageCreate
             };
             client.on("messageCreate", onMessageCreate);
