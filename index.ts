@@ -108,6 +108,17 @@ const helpPages = [
             });
     }
 ];
+const soundEffects = {
+    "enable": () => {
+        return createAudioResource(path.join(__dirname, "sound_effects", "enable.wav"), { inputType: StreamType.Arbitrary });
+    },
+    "disable": () => {
+        return createAudioResource(path.join(__dirname, "sound_effects", "disable.wav"), { inputType: StreamType.Arbitrary });
+    },
+    "error": () => {
+        return createAudioResource(path.join(__dirname, "sound_effects", "error.wav"), { inputType: StreamType.Arbitrary });
+    }
+};
 const voiceChannels = new Map();
 
 function setActivity() {
@@ -301,6 +312,7 @@ client.on("interactionCreate", async interaction => {
         connection.subscribe(player);
         voiceChannels.set(interaction.guildId as string, { connection, player });
         connection.on(VoiceConnectionStatus.Ready, () => {
+            player.play(soundEffects.enable());
             voiceChannels.get(interaction.guildId as string).checker = setInterval(() => {
                 if ((channel?.members as Collection<string, GuildMember>).size <= 1) {
                     interaction.channel?.send({
@@ -367,6 +379,7 @@ client.on("interactionCreate", async interaction => {
         switch ((interaction as ChatInputCommandInteraction).options.getSubcommand()) {
         case "synthesis":
             if (voiceChannels.get(interaction.guildId as string).synthesis) {
+                voiceChannels.get(interaction.guildId as string).player.play(soundEffects.disable());
                 client.off("messageCreate", voiceChannels.get(interaction.guildId as string).synthesis.messageCreate);
                 voiceChannels.get(interaction.guildId as string).synthesis = null;
                 if (!interaction.options.get("voice-id")?.value && !interaction.options.get("speed")?.value && !interaction.options.get("tone")?.value && !interaction.options.get("intonation")?.value && !interaction.options.get("volume")?.value) {
@@ -426,6 +439,7 @@ client.on("interactionCreate", async interaction => {
                 "messageCreate": onMessageCreate
             };
             client.on("messageCreate", onMessageCreate);
+            voiceChannels.get(interaction.guildId as string).player.play(soundEffects.enable());
             await interaction.reply({
                 "content": "音声合成を設定しました。",
                 "embeds": [{
