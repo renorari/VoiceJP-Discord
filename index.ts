@@ -579,7 +579,7 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
                     "content": "音声認識を更新しました。",
                     "embeds": [{
                         "title": "音声認識",
-                        "description": `音声認識を更新しました。\n現在${voiceChannels.get(interaction.guildId as string).recognition.recognizing.length}人の音声認識を行っています。`,
+                        "description": "音声認識を更新しました。",
                         "color": Colors.Green
                     }]
                 });
@@ -597,7 +597,7 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
                     "content": "音声認識を更新しました。",
                     "embeds": [{
                         "title": "音声認識",
-                        "description": `音声認識を更新しました。\n現在${voiceChannels.get(interaction.guildId as string).recognition.recognizing.length}人の音声認識を行っています。`,
+                        "description": "音声認識を更新しました。",
                         "color": Colors.Green
                     }]
                 });
@@ -614,7 +614,7 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
             "content": "音声認識を開始しました。",
             "embeds": [{
                 "title": "音声認識",
-                "description": `音声認識を開始しました。\n現在${recognizing.length}人の音声認識を行っています。`,
+                "description": "音声認識を開始しました。",
                 "color": Colors.Green
             }]
         });
