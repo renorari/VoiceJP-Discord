@@ -118,6 +118,9 @@ const helpPages = [
     }
 ];
 const soundEffects = {
+    "join": () => {
+        return createAudioResource(path.join(__dirname, "sound_effects", "join.wav"), { inputType: StreamType.Arbitrary });
+    },
     "enable": () => {
         return createAudioResource(path.join(__dirname, "sound_effects", "enable.wav"), { inputType: StreamType.Arbitrary });
     },
@@ -355,7 +358,7 @@ interactionCommands.set("join", async (interaction: ChatInputCommandInteraction)
     connection.subscribe(player);
     voiceChannels.set(interaction.guildId as string, { connection, player, channel });
     connection.on(VoiceConnectionStatus.Ready, () => {
-        player.play(soundEffects.enable());
+        player.play(soundEffects.join());
         voiceChannels.get(interaction.guildId as string).checker = setInterval(async () => {
             if ((channel?.members as Collection<string, GuildMember>).size <= 1) {
                 await disableVoice(interaction.guildId as string);
