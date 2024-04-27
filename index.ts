@@ -2,8 +2,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import stream from "node:stream";
-import { AudioPlayer, EndBehaviorType, StreamType, VoiceConnection, VoiceConnectionStatus, createAudioPlayer, createAudioResource, joinVoiceChannel } from "@discordjs/voice";
-import { REST, Routes, Client, IntentsBitField, SlashCommandBuilder, Colors, ActivityType, PermissionFlagsBits, SlashCommandSubcommandBuilder, SlashCommandStringOption, SlashCommandChannelOption, ChannelType, Message, ChatInputCommandInteraction, BaseGuildVoiceChannel, VoiceChannel, GuildBasedChannel, Collection, GuildMember, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import { EndBehaviorType, StreamType, VoiceConnectionStatus, createAudioPlayer, createAudioResource, joinVoiceChannel } from "@discordjs/voice";
+import { REST, Routes, Client, IntentsBitField, SlashCommandBuilder, Colors, ActivityType, PermissionFlagsBits, SlashCommandSubcommandBuilder, SlashCommandStringOption, SlashCommandChannelOption, ChannelType, Message, ChatInputCommandInteraction, Collection, GuildMember, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import * as prism from "prism-media";
 import * as vosk from "vosk";
 import dotenv from "dotenv";
