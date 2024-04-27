@@ -19,6 +19,7 @@ if (!fs.existsSync(path.join(__dirname, "temp"))) {
 }
 
 const voiceModels = JSON.parse(fs.readFileSync(path.join(__dirname, "voice_models/models.json"), "utf-8"));
+const voskModel = new vosk.Model(path.join(__dirname, "vosk_models", "vosk-model-ja-0.22"));
 const token = process.env.TOKEN as string;
 const client = new Client({
     intents: [
@@ -415,7 +416,7 @@ async function addSpeechRecognizeMember(member: GuildMember, guildId: string, ch
 
     }).pipe(new prism.opus.Decoder({ rate: 48000, channels: 1, frameSize: 960 }));
     const recognizer = new vosk.Recognizer({
-        model: new vosk.Model(path.join(__dirname, "vosk_models", "vosk-model-ja-0.22")),
+        model: voskModel,
         sampleRate: 48000,
     });
     const filledSilence = new FillSilenceStream();
