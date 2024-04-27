@@ -1,8 +1,11 @@
 /* VoiceJP Main Script */
 import fs from "node:fs";
 import path from "node:path";
-import { AudioPlayer, StreamType, VoiceConnection, VoiceConnectionStatus, createAudioPlayer, createAudioResource, joinVoiceChannel } from "@discordjs/voice";
+import stream from "node:stream";
+import { AudioPlayer, EndBehaviorType, StreamType, VoiceConnection, VoiceConnectionStatus, createAudioPlayer, createAudioResource, joinVoiceChannel } from "@discordjs/voice";
 import { REST, Routes, Client, IntentsBitField, SlashCommandBuilder, Colors, ActivityType, PermissionFlagsBits, SlashCommandSubcommandBuilder, SlashCommandStringOption, SlashCommandChannelOption, ChannelType, Message, ChatInputCommandInteraction, BaseGuildVoiceChannel, VoiceChannel, GuildBasedChannel, Collection, GuildMember, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import * as prism from "prism-media";
+import * as vosk from "vosk";
 import dotenv from "dotenv";
 import { generateVoice } from "./speech";
 dotenv.config();
@@ -218,6 +221,31 @@ client.on("ready", async () => {
     setInterval(setActivity, 1000 * 10);
 });
 
+class fillSilenceStream extends stream.Transform {
+    current: Buffer[];
+    interval: NodeJS.Timeout;
+
+    constructor(rate: number = 48000, channels: number = 1, frameSize: number = 960) {
+        super();
+        this.current = [];
+        this.interval = setInterval(() => {
+            if (this.current.length === 0) {
+                this.push(Buffer.alloc(frameSize * 2 * channels));
+            } else {
+                this.push(this.current.shift());
+            }
+        }, 1000 / (rate / frameSize));
+    }
+
+    _write(chunk: Buffer, encoding: BufferEncoding, callback: (error?: Error | null | undefined) => void): void {
+        this.current.push(chunk);
+        callback();
+    }
+
+    _read() {}
+}
+
+
 client.on("interactionCreate", async interaction => {
     if (!interaction.isCommand()) return;
     if (!interaction.member) {
@@ -229,6 +257,7 @@ client.on("interactionCreate", async interaction => {
     let player: AudioPlayer;
     let voiceModel: { id: string; file: string; name: string; };
     let onMessageCreate;
+    let recognitionMembers: Map<string, GuildMember>;
     switch (interaction.commandName) {
     case "ping":
         await interaction.reply({
@@ -310,7 +339,7 @@ client.on("interactionCreate", async interaction => {
         });
         player = createAudioPlayer();
         connection.subscribe(player);
-        voiceChannels.set(interaction.guildId as string, { connection, player });
+        voiceChannels.set(interaction.guildId as string, { connection, player, channel });
         connection.on(VoiceConnectionStatus.Ready, () => {
             player.play(soundEffects.enable());
             voiceChannels.get(interaction.guildId as string).checker = setInterval(() => {
@@ -449,6 +478,40 @@ client.on("interactionCreate", async interaction => {
                 }]
             });
             break;
+        case "recognition":
+            recognitionMembers = new Map<string, GuildMember>();
+            voiceChannels.get(interaction.guildId as string).channel.members.forEach((member: GuildMember) => {
+                if (member.user.bot) return;
+                recognitionMembers.set(member.id, member);
+            });
+            recognitionMembers.forEach(async (member: GuildMember) => {
+                if (interaction.channel?.type !== ChannelType.GuildText) return;
+                const webhook = await interaction.channel?.createWebhook({
+                    name: `${member.displayName}[VoiceJP]`,
+                    avatar: member.user.displayAvatarURL({"extension": "png", "size": 1024, "forceStatic": false}),
+                    reason: "VoiceJP Voice Recognition"
+                });
+                const voice = voiceChannels.get(interaction.guildId as string).connection.receiver.subscribe(member.id, {
+                    end: {
+                        behavior: EndBehaviorType.Manual
+                    },
+                    
+                }).pipe(new prism.opus.Decoder({ rate: 48000, channels: 1, frameSize: 960 }));
+                const recognizer = new vosk.Recognizer({
+                    model: new vosk.Model(path.join(__dirname, "vosk_models", "vosk-model-ja-0.22")),
+                    sampleRate: 48000,
+                });
+                const filledSilence = new fillSilenceStream();
+                voice.pipe(filledSilence);
+                filledSilence.pipe(fs.createWriteStream(path.join(__dirname, "temp", `${member.id}.pcm`)));
+                filledSilence.on("data", async (data: Buffer) => {
+                    if (recognizer.acceptWaveform(data)) {
+                        const result = recognizer.result().text.replace(/ /g, "").replace(/。/g, "。\n").trim();
+                        if (result === "") return;
+                        webhook.send(result.slice(0, 1000) + (result.length > 1000 ? "…" : ""));
+                    }
+                });
+            });
         }
         break;
     }
