@@ -533,6 +533,7 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
     } else if (subCommand === "recognition") {
         if (voiceChannels.get(interaction.guildId as string).recognition) {
             await disableSpeechRecognition(interaction.guildId as string);
+            voiceChannels.get(interaction.guildId as string).player.play(soundEffects.disable());
             await interaction.reply({
                 "content": "音声認識を解除しました。",
                 "embeds": [{
@@ -605,6 +606,7 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
             "members": recognitionMembers,
             "recognizing": recognizing
         };
+        voiceChannels.get(interaction.guildId as string).player.play(soundEffects.enable());
         await interaction.reply({
             "content": "音声認識を開始しました。",
             "embeds": [{
