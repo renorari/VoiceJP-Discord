@@ -245,6 +245,22 @@ class fillSilenceStream extends stream.Transform {
     _read() {}
 }
 
+async function disableVoice(guildId: string) {
+    if (!voiceChannels.has(guildId)) return;
+    await disableSpeechSynthesis(guildId);
+    voiceChannels.get(guildId).connection.destroy();
+    clearInterval(voiceChannels.get(guildId).checker);
+    voiceChannels.delete(guildId);
+}
+async function disableSpeechSynthesis(guildId: string) {
+    if (!voiceChannels.has(guildId)) return;
+    if (voiceChannels.get(guildId).synthesis) {
+        voiceChannels.get(guildId).player.play(soundEffects.disable());
+        client.off("messageCreate", voiceChannels.get(guildId).synthesis.messageCreate);
+        voiceChannels.get(guildId).synthesis = null;
+    }
+}
+
 const interactionCommands = new Map<string, (interaction: ChatInputCommandInteraction) => void>();
 interactionCommands.set("ping", async (interaction: ChatInputCommandInteraction) => {
     await interaction.reply({
@@ -313,10 +329,7 @@ interactionCommands.set("join", async (interaction: ChatInputCommandInteraction)
         });
         return;
     }
-    if (voiceChannels.has(interaction.guildId as string)) {
-        voiceChannels.get(interaction.guildId as string).connection.destroy();
-        voiceChannels.delete(interaction.guildId as string);
-    }
+    await disableVoice(interaction.guildId as string);
     const connection = joinVoiceChannel({
         channelId: channel.id,
         guildId: channel.guild.id,
@@ -329,8 +342,9 @@ interactionCommands.set("join", async (interaction: ChatInputCommandInteraction)
     voiceChannels.set(interaction.guildId as string, { connection, player, channel });
     connection.on(VoiceConnectionStatus.Ready, () => {
         player.play(soundEffects.enable());
-        voiceChannels.get(interaction.guildId as string).checker = setInterval(() => {
+        voiceChannels.get(interaction.guildId as string).checker = setInterval(async () => {
             if ((channel?.members as Collection<string, GuildMember>).size <= 1) {
+                await disableVoice(interaction.guildId as string);
                 interaction.channel?.send({
                     "content": "ボイスチャンネルから退出しました。",
                     "embeds": [{
@@ -339,9 +353,6 @@ interactionCommands.set("join", async (interaction: ChatInputCommandInteraction)
                         "color": Colors.Yellow
                     }]
                 });
-                connection.destroy();
-                clearInterval(voiceChannels.get(interaction.guildId as string).checker);
-                voiceChannels.delete(interaction.guildId as string);
             }
         });
     });
@@ -367,9 +378,7 @@ interactionCommands.set("leave", async (interaction: ChatInputCommandInteraction
         });
         return;
     }
-    voiceChannels.get(interaction.guildId as string).connection.destroy();
-    clearInterval(voiceChannels.get(interaction.guildId as string).checker);
-    voiceChannels.delete(interaction.guildId as string);
+    await disableVoice(interaction.guildId as string);
     await interaction.reply({
         "content": "ボイスチャンネルから退出しました。",
         "embeds": [{
@@ -395,9 +404,7 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
     const subCommand = interaction.options.getSubcommand();
     if (subCommand === "synthesis") {
         if (voiceChannels.get(interaction.guildId as string).synthesis) {
-            voiceChannels.get(interaction.guildId as string).player.play(soundEffects.disable());
-            client.off("messageCreate", voiceChannels.get(interaction.guildId as string).synthesis.messageCreate);
-            voiceChannels.get(interaction.guildId as string).synthesis = null;
+            await disableSpeechSynthesis(interaction.guildId as string);
             if (!interaction.options.get("voice-id")?.value && !interaction.options.get("speed")?.value && !interaction.options.get("tone")?.value && !interaction.options.get("intonation")?.value && !interaction.options.get("volume")?.value) {
                 await interaction.reply({
                     "content": "音声合成を解除しました。",
