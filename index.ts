@@ -66,7 +66,7 @@ const helpPages = [
             .setFields(
                 {
                     "name": `</speech synthesis:${(await client.application?.commands.fetch())?.find((command) => command.name === "speech")?.id}>`,
-                    "value": "このコマンドを使用して、音声読み上げを設定することができます。"
+                    "value": "このコマンドを使用して、音声読み上げを設定することができます。\nもう一度実行すると、音声読み上げを解除します。"
                 },
                 {
                     "name": `</speech synthesis:${(await client.application?.commands.fetch())?.find((command) => command.name === "speech")?.id}> voice-id:`,
@@ -92,11 +92,16 @@ const helpPages = [
                 "text": "VoiceJP 使い方 3/5"
             });
     },
-    () => {
+    async () => {
         return new EmbedBuilder()
             .setTitle("使い方 - 音声認識")
-            .setDescription("VoiceJPの文字起こし機能は、開発中です。\n2024年4月ごろまでの完成を目指しています。")
+            .setDescription("VoiceJPでは、音声認識を行うことができます。\nこのページでは、音声認識について説明します。")
             .setColor(Colors.LuminousVividPink)
+            .setFields(
+                {
+                    "name": `</speech recognition:${(await client.application?.commands.fetch())?.find((command) => command.name === "speech")?.id}>`,
+                    "value": "このコマンドを使用して、音声認識を開始することができます。\nこのコマンドを実行すると、その実行したチャンネルで各メンバーのWebhookが作成されます。\nもう一度実行すると、音声認識を解除します。"
+                })
             .setFooter({
                 "text": "VoiceJP 使い方 4/5"
             });
@@ -242,7 +247,7 @@ class FillSilenceStream extends stream.Transform {
         callback();
     }
 
-    _read() {}
+    _read() { }
 }
 
 async function disableVoice(guildId: string) {
