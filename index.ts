@@ -392,7 +392,8 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
         });
         return;
     }
-    if ((interaction as ChatInputCommandInteraction).options.getSubcommand() === "synthesis") {
+    const subCommand = interaction.options.getSubcommand();
+    if (subCommand === "synthesis") {
         if (voiceChannels.get(interaction.guildId as string).synthesis) {
             voiceChannels.get(interaction.guildId as string).player.play(soundEffects.disable());
             client.off("messageCreate", voiceChannels.get(interaction.guildId as string).synthesis.messageCreate);
@@ -464,7 +465,7 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
             }]
         });
 
-    } else if ((interaction as ChatInputCommandInteraction).options.getSubcommand() === "recognition") {
+    } else if (subCommand === "recognition") {
         const recognitionMembers = new Map<string, GuildMember>();
         voiceChannels.get(interaction.guildId as string).channel.members.forEach((member: GuildMember) => {
             if (member.user.bot) return;
