@@ -70,7 +70,7 @@ const helpPages = [
                 },
                 {
                     "name": `</speech synthesis:${(await client.application?.commands.fetch())?.find((command) => command.name === "speech")?.id}> voice-id:`,
-                    "value": "音声IDを設定します。\nデフォルトでは、KanaVoiceのVoiceAが設定されています。"
+                    "value": "音声IDを設定します。"
                 },
                 {
                     "name": `</speech synthesis:${(await client.application?.commands.fetch())?.find((command) => command.name === "speech")?.id}> speed:`,
@@ -409,7 +409,7 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
                 return;
             }
         }
-        const voiceModel = voiceModels.find((voiceModel: { id: string; }) => voiceModel.id === (interaction.options.get("voice-id")?.value ?? "voicea"));
+        const voiceModel = voiceModels.find((voiceModel: { id: string; }) => voiceModel.id === (interaction.options.get("voice-id")?.value ?? voiceModels[0].id));
         if (!voiceModel) {
             await interaction.reply({
                 "content": "エラーが発生しました。",
