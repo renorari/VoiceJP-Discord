@@ -262,18 +262,16 @@ async function disableVoice(guildId: string) {
     voiceChannels.delete(guildId);
 }
 async function disableSpeechSynthesis(guildId: string) {
-    if (!voiceChannels.has(guildId)) return;
-    if (voiceChannels.get(guildId).synthesis) {
-        voiceChannels.get(guildId).player.play(soundEffects.disable());
-        client.off("messageCreate", voiceChannels.get(guildId).synthesis.messageCreate);
-        voiceChannels.get(guildId).synthesis = null;
-    }
+    if (!voiceChannels.has(guildId) || !voiceChannels.get(guildId).synthesis) return;
+    voiceChannels.get(guildId).player.play(soundEffects.disable());
+    client.off("messageCreate", voiceChannels.get(guildId).synthesis.messageCreate);
+    voiceChannels.get(guildId).synthesis = null;
 }
 async function disableSpeechRecognition(guildId: string) {
-    if (!voiceChannels.has(guildId)) return;
-    voiceChannels.get(guildId).recognition.recognizing.forEach(async (recognizingMember: { member: GuildMember; }) => {
+    if (!voiceChannels.has(guildId) || !voiceChannels.get(guildId).recognition) return;
+    await Promise.all(voiceChannels.get(guildId).recognition.recognizing.map(async (recognizingMember: { member: GuildMember; }) => {
         await removeSpeechRecognizeMember(recognizingMember.member, guildId);
-    });
+    }));
     client.off("voiceStateUpdate", voiceChannels.get(guildId).recognition.onVoiceStateUpdate);
     voiceChannels.get(guildId).recognition = null;
 }
@@ -447,7 +445,7 @@ async function removeSpeechRecognizeMember(member: GuildMember, guildId: string)
     recognizingMember.filledSilence.destroy();
     recognizingMember.recognizer.free();
     recognizingMember.webhook.delete();
-    voiceChannels.get(guildId).recognition.recognizing.splice(voiceChannels.get(guildId).recognition.indexOf(recognizingMember), 1);
+    voiceChannels.get(guildId).recognition.recognizing.splice(voiceChannels.get(guildId).recognition.recognizing.indexOf(recognizingMember), 1);
 }
 
 interactionCommands.set("speech", async (interaction: ChatInputCommandInteraction) => {
