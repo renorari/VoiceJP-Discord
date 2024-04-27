@@ -245,6 +245,262 @@ class fillSilenceStream extends stream.Transform {
     _read() {}
 }
 
+const interactionCommands = new Map<string, (interaction: ChatInputCommandInteraction) => void>();
+interactionCommands.set("ping", async (interaction: ChatInputCommandInteraction) => {
+    await interaction.reply({
+        content: "ポン!",
+        embeds: [{
+            title: "ポン!",
+            description: `レイテンシ: ${client.ws.ping}m秒`,
+            color: Colors.LuminousVividPink
+        }]
+    });
+});
+interactionCommands.set("help", async (interaction: ChatInputCommandInteraction) => {
+    await interaction.reply({
+        content: "VoiceJPの使い方を表示します。",
+        embeds: [await helpPages[0]()],
+        components: [
+            new ActionRowBuilder<ButtonBuilder>()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId("help-0")
+                        .setLabel("前へ")
+                        .setStyle(ButtonStyle.Primary)
+                        .setDisabled(true),
+                    new ButtonBuilder()
+                        .setCustomId("help-1")
+                        .setLabel("次へ")
+                        .setStyle(ButtonStyle.Primary)
+                )
+        ]
+    });
+});
+interactionCommands.set("join", async (interaction: ChatInputCommandInteraction) => {
+    const channel = await interaction.guild?.channels.fetch(interaction.options.get("channel")?.value as string);
+    if (!channel) {
+        await interaction.reply({
+            "content": "エラーが発生しました。",
+            "embeds": [{
+                "title": "エラー",
+                "description": "チャンネルが見つかりません。",
+                "color": Colors.Red
+            }],
+            "ephemeral": true
+        });
+        return;
+    }
+    if (channel.type !== ChannelType.GuildVoice) {
+        await interaction.reply({
+            "content": "エラーが発生しました。",
+            "embeds": [{
+                "title": "エラー",
+                "description": "ボイスチャンネルを指定してください。",
+                "color": Colors.Red
+            }],
+            "ephemeral": true
+        });
+        return;
+    } else if (!channel.joinable) {
+        await interaction.reply({
+            "content": "エラーが発生しました。",
+            "embeds": [{
+                "title": "エラー",
+                "description": "参加できません。",
+                "color": Colors.Red
+            }],
+            "ephemeral": true
+        });
+        return;
+    }
+    if (voiceChannels.has(interaction.guildId as string)) {
+        voiceChannels.get(interaction.guildId as string).connection.destroy();
+        voiceChannels.delete(interaction.guildId as string);
+    }
+    const connection = joinVoiceChannel({
+        channelId: channel.id,
+        guildId: channel.guild.id,
+        adapterCreator: channel.guild.voiceAdapterCreator,
+        selfDeaf: false,
+        selfMute: false
+    });
+    const player = createAudioPlayer();
+    connection.subscribe(player);
+    voiceChannels.set(interaction.guildId as string, { connection, player, channel });
+    connection.on(VoiceConnectionStatus.Ready, () => {
+        player.play(soundEffects.enable());
+        voiceChannels.get(interaction.guildId as string).checker = setInterval(() => {
+            if ((channel?.members as Collection<string, GuildMember>).size <= 1) {
+                interaction.channel?.send({
+                    "content": "ボイスチャンネルから退出しました。",
+                    "embeds": [{
+                        "title": "退出",
+                        "description": "ボイスチャンネルから退出しました。",
+                        "color": Colors.Yellow
+                    }]
+                });
+                connection.destroy();
+                clearInterval(voiceChannels.get(interaction.guildId as string).checker);
+                voiceChannels.delete(interaction.guildId as string);
+            }
+        });
+    });
+    await interaction.reply({
+        "content": "ボイスチャンネルに参加しました。",
+        "embeds": [{
+            "title": "参加",
+            "description": `${channel.name}に参加しました。`,
+            "color": Colors.Green
+        }]
+    });
+});
+interactionCommands.set("leave", async (interaction: ChatInputCommandInteraction) => {
+    if (!voiceChannels.has(interaction.guildId as string)) {
+        await interaction.reply({
+            "content": "エラーが発生しました。",
+            "embeds": [{
+                "title": "エラー",
+                "description": "ボイスチャンネルに参加していません。",
+                "color": Colors.Red
+            }],
+            "ephemeral": true
+        });
+        return;
+    }
+    voiceChannels.get(interaction.guildId as string).connection.destroy();
+    clearInterval(voiceChannels.get(interaction.guildId as string).checker);
+    voiceChannels.delete(interaction.guildId as string);
+    await interaction.reply({
+        "content": "ボイスチャンネルから退出しました。",
+        "embeds": [{
+            "title": "退出",
+            "description": "ボイスチャンネルから退出しました。",
+            "color": Colors.Green
+        }]
+    });
+});
+interactionCommands.set("speech", async (interaction: ChatInputCommandInteraction) => {
+    if (!voiceChannels.has(interaction.guildId as string)) {
+        await interaction.reply({
+            "content": "エラーが発生しました。",
+            "embeds": [{
+                "title": "エラー",
+                "description": "ボイスチャンネルに参加していません。",
+                "color": Colors.Red
+            }],
+            "ephemeral": true
+        });
+        return;
+    }
+    if ((interaction as ChatInputCommandInteraction).options.getSubcommand() === "synthesis") {
+        if (voiceChannels.get(interaction.guildId as string).synthesis) {
+            voiceChannels.get(interaction.guildId as string).player.play(soundEffects.disable());
+            client.off("messageCreate", voiceChannels.get(interaction.guildId as string).synthesis.messageCreate);
+            voiceChannels.get(interaction.guildId as string).synthesis = null;
+            if (!interaction.options.get("voice-id")?.value && !interaction.options.get("speed")?.value && !interaction.options.get("tone")?.value && !interaction.options.get("intonation")?.value && !interaction.options.get("volume")?.value) {
+                await interaction.reply({
+                    "content": "音声合成を解除しました。",
+                    "embeds": [{
+                        "title": "音声合成",
+                        "description": "音声合成を解除しました。",
+                        "color": Colors.Green
+                    }]
+                });
+                return;
+            }
+        }
+        const voiceModel = voiceModels.find((voiceModel: { id: string; }) => voiceModel.id === (interaction.options.get("voice-id")?.value ?? "voicea"));
+        if (!voiceModel) {
+            await interaction.reply({
+                "content": "エラーが発生しました。",
+                "embeds": [{
+                    "title": "エラー",
+                    "description": "音声IDが見つかりません。",
+                    "color": Colors.Red
+                }],
+                "ephemeral": true
+            });
+            return;
+        }
+        const onMessageCreate = async (message: Message) => {
+            if (message.author.bot) return;
+            if (message.channel.id !== voiceChannels.get(interaction.guildId as string)?.synthesis?.channel) return;
+            if (message.content.length > 100 || message.content == "") return;
+            const filePath = path.join(__dirname, "temp", `${message.id}`);
+            const generatedVoice = await generateVoice(
+                // eslint-disable-next-line no-useless-escape
+                `${message.member?.displayName ? message.member.displayName : message.author.username}。${message.cleanContent.replace(/https?:\/\/[\w/:%#\$&\?\(\)~\.=\+\-]+/g, "URL省略")}`,
+                filePath,
+                path.join(__dirname, "voice_models", voiceModel.file),
+                voiceChannels.get(interaction.guildId as string).synthesis.speed,
+                voiceChannels.get(interaction.guildId as string).synthesis.tone,
+                voiceChannels.get(interaction.guildId as string).synthesis.intonation,
+                voiceChannels.get(interaction.guildId as string).synthesis.volume,
+                0.25
+            ).catch((error) => {
+                console.error(error);
+            });
+            if (!generatedVoice) return;
+            const resource = createAudioResource(generatedVoice, { inputType: StreamType.Arbitrary });
+            voiceChannels.get(interaction.guildId as string).player.play(resource);
+        };
+        voiceChannels.get(interaction.guildId as string).synthesis = {
+            "channel": interaction.channel?.id as string,
+            "voiceModel": voiceModel,
+            "speed": interaction.options.get("speed")?.value as number ?? 1.25,
+            "tone": interaction.options.get("tone")?.value as number ?? 1,
+            "intonation": interaction.options.get("intonation")?.value as number ?? 1,
+            "volume": interaction.options.get("volume")?.value as number ?? 0,
+            "messageCreate": onMessageCreate
+        };
+        client.on("messageCreate", onMessageCreate);
+        voiceChannels.get(interaction.guildId as string).player.play(soundEffects.enable());
+        await interaction.reply({
+            "content": "音声合成を設定しました。",
+            "embeds": [{
+                "title": "音声合成",
+                "description": `音声: ${voiceModel.name}\n速度: ${voiceChannels.get(interaction.guildId as string).synthesis.speed}\n音程: ${voiceChannels.get(interaction.guildId as string).synthesis.tone}\n抑揚: ${voiceChannels.get(interaction.guildId as string).synthesis.intonation}\n音量: ${voiceChannels.get(interaction.guildId as string).synthesis.volume}`,
+                "color": Colors.Green
+            }]
+        });
+
+    } else if ((interaction as ChatInputCommandInteraction).options.getSubcommand() === "recognition") {
+        const recognitionMembers = new Map<string, GuildMember>();
+        voiceChannels.get(interaction.guildId as string).channel.members.forEach((member: GuildMember) => {
+            if (member.user.bot) return;
+            recognitionMembers.set(member.id, member);
+        });
+        recognitionMembers.forEach(async (member: GuildMember) => {
+            if (interaction.channel?.type !== ChannelType.GuildText) return;
+            const webhook = await interaction.channel?.createWebhook({
+                name: `${member.displayName}[VoiceJP]`,
+                avatar: member.user.displayAvatarURL({ "extension": "png", "size": 1024, "forceStatic": false }),
+                reason: "VoiceJP Voice Recognition"
+            });
+            const voice = voiceChannels.get(interaction.guildId as string).connection.receiver.subscribe(member.id, {
+                end: {
+                    behavior: EndBehaviorType.Manual
+                },
+
+            }).pipe(new prism.opus.Decoder({ rate: 48000, channels: 1, frameSize: 960 }));
+            const recognizer = new vosk.Recognizer({
+                model: new vosk.Model(path.join(__dirname, "vosk_models", "vosk-model-ja-0.22")),
+                sampleRate: 48000,
+            });
+            const filledSilence = new fillSilenceStream();
+            voice.pipe(filledSilence);
+            filledSilence.pipe(fs.createWriteStream(path.join(__dirname, "temp", `${member.id}.pcm`)));
+            filledSilence.on("data", async (data: Buffer) => {
+                if (recognizer.acceptWaveform(data)) {
+                    const result = recognizer.result().text.replace(/ /g, "").replace(/。/g, "。\n").trim();
+                    if (result === "") return;
+                    webhook.send(result.slice(0, 1000) + (result.length > 1000 ? "…" : ""));
+                }
+            });
+        });
+    }
+});
+
 
 client.on("interactionCreate", async interaction => {
     if (!interaction.isCommand()) return;
@@ -252,268 +508,21 @@ client.on("interactionCreate", async interaction => {
         await interaction.reply("申し訳ございませんが、DMでは使用できません。");
         return;
     }
-    let channel: BaseGuildVoiceChannel | VoiceChannel | GuildBasedChannel | null | undefined;
-    let connection: VoiceConnection;
-    let player: AudioPlayer;
-    let voiceModel: { id: string; file: string; name: string; };
-    let onMessageCreate;
-    let recognitionMembers: Map<string, GuildMember>;
-    switch (interaction.commandName) {
-    case "ping":
-        await interaction.reply({
-            content: "ポン!",
-            embeds: [{
-                title: "ポン!",
-                description: `レイテンシ: ${client.ws.ping}m秒`,
-                color: Colors.LuminousVividPink
-            }]
-        });
-        break;
-    case "help":
-        await interaction.reply({
-            content: "VoiceJPの使い方を表示します。",
-            embeds: [await helpPages[0]()],
-            components: [
-                new ActionRowBuilder<ButtonBuilder>()
-                    .addComponents(
-                        new ButtonBuilder()
-                            .setCustomId("help-0")
-                            .setLabel("前へ")
-                            .setStyle(ButtonStyle.Primary)
-                            .setDisabled(true),
-                        new ButtonBuilder()
-                            .setCustomId("help-1")
-                            .setLabel("次へ")
-                            .setStyle(ButtonStyle.Primary)
-                    )
-            ]
-        });
-        break;
-    case "join":
-        channel = await interaction.guild?.channels.fetch(interaction.options.get("channel")?.value as string);
-        if (!channel) {
+    if (interactionCommands.has(interaction.commandName)) {
+        const command = interactionCommands.get(interaction.commandName);
+        if (command !== undefined) {
+            command(interaction as ChatInputCommandInteraction);
+        } else {
             await interaction.reply({
                 "content": "エラーが発生しました。",
                 "embeds": [{
                     "title": "エラー",
-                    "description": "チャンネルが見つかりません。",
+                    "description": "コマンドが見つかりません。",
                     "color": Colors.Red
                 }],
                 "ephemeral": true
             });
-            return;
         }
-        if (channel.type !== ChannelType.GuildVoice) {
-            await interaction.reply({
-                "content": "エラーが発生しました。",
-                "embeds": [{
-                    "title": "エラー",
-                    "description": "ボイスチャンネルを指定してください。",
-                    "color": Colors.Red
-                }],
-                "ephemeral": true
-            });
-            return;
-        } else if (!channel.joinable) {
-            await interaction.reply({
-                "content": "エラーが発生しました。",
-                "embeds": [{
-                    "title": "エラー",
-                    "description": "参加できません。",
-                    "color": Colors.Red
-                }],
-                "ephemeral": true
-            });
-            return;
-        }
-        if (voiceChannels.has(interaction.guildId as string)) {
-            voiceChannels.get(interaction.guildId as string).connection.destroy();
-            voiceChannels.delete(interaction.guildId as string);
-        }
-        connection = joinVoiceChannel({
-            channelId: channel.id,
-            guildId: channel.guild.id,
-            adapterCreator: channel.guild.voiceAdapterCreator,
-            selfDeaf: false,
-            selfMute: false
-        });
-        player = createAudioPlayer();
-        connection.subscribe(player);
-        voiceChannels.set(interaction.guildId as string, { connection, player, channel });
-        connection.on(VoiceConnectionStatus.Ready, () => {
-            player.play(soundEffects.enable());
-            voiceChannels.get(interaction.guildId as string).checker = setInterval(() => {
-                if ((channel?.members as Collection<string, GuildMember>).size <= 1) {
-                    interaction.channel?.send({
-                        "content": "ボイスチャンネルから退出しました。",
-                        "embeds": [{
-                            "title": "退出",
-                            "description": "ボイスチャンネルから退出しました。",
-                            "color": Colors.Yellow
-                        }]
-                    });
-                    connection.destroy();
-                    clearInterval(voiceChannels.get(interaction.guildId as string).checker);
-                    voiceChannels.delete(interaction.guildId as string);
-                }
-            });
-        });
-        await interaction.reply({
-            "content": "ボイスチャンネルに参加しました。",
-            "embeds": [{
-                "title": "参加",
-                "description": `${channel.name}に参加しました。`,
-                "color": Colors.Green
-            }]
-        });
-        break;
-    case "leave":
-        if (!voiceChannels.has(interaction.guildId as string)) {
-            await interaction.reply({
-                "content": "エラーが発生しました。",
-                "embeds": [{
-                    "title": "エラー",
-                    "description": "ボイスチャンネルに参加していません。",
-                    "color": Colors.Red
-                }],
-                "ephemeral": true
-            });
-            return;
-        }
-        voiceChannels.get(interaction.guildId as string).connection.destroy();
-        clearInterval(voiceChannels.get(interaction.guildId as string).checker);
-        voiceChannels.delete(interaction.guildId as string);
-        await interaction.reply({
-            "content": "ボイスチャンネルから退出しました。",
-            "embeds": [{
-                "title": "退出",
-                "description": "ボイスチャンネルから退出しました。",
-                "color": Colors.Green
-            }]
-        });
-        break;
-    case "speech":
-        if (!voiceChannels.has(interaction.guildId as string)) {
-            await interaction.reply({
-                "content": "エラーが発生しました。",
-                "embeds": [{
-                    "title": "エラー",
-                    "description": "ボイスチャンネルに参加していません。",
-                    "color": Colors.Red
-                }],
-                "ephemeral": true
-            });
-            return;
-        }
-        switch ((interaction as ChatInputCommandInteraction).options.getSubcommand()) {
-        case "synthesis":
-            if (voiceChannels.get(interaction.guildId as string).synthesis) {
-                voiceChannels.get(interaction.guildId as string).player.play(soundEffects.disable());
-                client.off("messageCreate", voiceChannels.get(interaction.guildId as string).synthesis.messageCreate);
-                voiceChannels.get(interaction.guildId as string).synthesis = null;
-                if (!interaction.options.get("voice-id")?.value && !interaction.options.get("speed")?.value && !interaction.options.get("tone")?.value && !interaction.options.get("intonation")?.value && !interaction.options.get("volume")?.value) {
-                    await interaction.reply({
-                        "content": "音声合成を解除しました。",
-                        "embeds": [{
-                            "title": "音声合成",
-                            "description": "音声合成を解除しました。",
-                            "color": Colors.Green
-                        }]
-                    });
-                    return;
-                }
-            }
-            voiceModel = voiceModels.find((voiceModel: { id: string; }) => voiceModel.id === (interaction.options.get("voice-id")?.value ?? "voicea"));
-            if (!voiceModel) {
-                await interaction.reply({
-                    "content": "エラーが発生しました。",
-                    "embeds": [{
-                        "title": "エラー",
-                        "description": "音声IDが見つかりません。",
-                        "color": Colors.Red
-                    }],
-                    "ephemeral": true
-                });
-                return;
-            }
-            onMessageCreate = async (message: Message) => {
-                if (message.author.bot) return;
-                if (message.channel.id !== voiceChannels.get(interaction.guildId as string)?.synthesis?.channel) return;
-                if (message.content.length > 100 || message.content == "") return;
-                const filePath = path.join(__dirname, "temp", `${message.id}`);
-                const generatedVoice = await generateVoice(
-                    // eslint-disable-next-line no-useless-escape
-                    `${message.member?.displayName ? message.member.displayName : message.author.username}。${message.cleanContent.replace(/https?:\/\/[\w/:%#\$&\?\(\)~\.=\+\-]+/g, "URL省略")}`,
-                    filePath,
-                    path.join(__dirname, "voice_models", voiceModel.file),
-                    voiceChannels.get(interaction.guildId as string).synthesis.speed,
-                    voiceChannels.get(interaction.guildId as string).synthesis.tone,
-                    voiceChannels.get(interaction.guildId as string).synthesis.intonation,
-                    voiceChannels.get(interaction.guildId as string).synthesis.volume,
-                    0.25
-                ).catch((error) => {
-                    console.error(error);
-                });
-                if (!generatedVoice) return;
-                const resource = createAudioResource(generatedVoice, { inputType: StreamType.Arbitrary });
-                voiceChannels.get(interaction.guildId as string).player.play(resource);
-            };
-            voiceChannels.get(interaction.guildId as string).synthesis = {
-                "channel": interaction.channel?.id as string,
-                "voiceModel": voiceModel,
-                "speed": interaction.options.get("speed")?.value as number ?? 1.25,
-                "tone": interaction.options.get("tone")?.value as number ?? 1,
-                "intonation": interaction.options.get("intonation")?.value as number ?? 1,
-                "volume": interaction.options.get("volume")?.value as number ?? 0,
-                "messageCreate": onMessageCreate
-            };
-            client.on("messageCreate", onMessageCreate);
-            voiceChannels.get(interaction.guildId as string).player.play(soundEffects.enable());
-            await interaction.reply({
-                "content": "音声合成を設定しました。",
-                "embeds": [{
-                    "title": "音声合成",
-                    "description": `音声: ${voiceModel.name}\n速度: ${voiceChannels.get(interaction.guildId as string).synthesis.speed}\n音程: ${voiceChannels.get(interaction.guildId as string).synthesis.tone}\n抑揚: ${voiceChannels.get(interaction.guildId as string).synthesis.intonation}\n音量: ${voiceChannels.get(interaction.guildId as string).synthesis.volume}`,
-                    "color": Colors.Green
-                }]
-            });
-            break;
-        case "recognition":
-            recognitionMembers = new Map<string, GuildMember>();
-            voiceChannels.get(interaction.guildId as string).channel.members.forEach((member: GuildMember) => {
-                if (member.user.bot) return;
-                recognitionMembers.set(member.id, member);
-            });
-            recognitionMembers.forEach(async (member: GuildMember) => {
-                if (interaction.channel?.type !== ChannelType.GuildText) return;
-                const webhook = await interaction.channel?.createWebhook({
-                    name: `${member.displayName}[VoiceJP]`,
-                    avatar: member.user.displayAvatarURL({"extension": "png", "size": 1024, "forceStatic": false}),
-                    reason: "VoiceJP Voice Recognition"
-                });
-                const voice = voiceChannels.get(interaction.guildId as string).connection.receiver.subscribe(member.id, {
-                    end: {
-                        behavior: EndBehaviorType.Manual
-                    },
-                    
-                }).pipe(new prism.opus.Decoder({ rate: 48000, channels: 1, frameSize: 960 }));
-                const recognizer = new vosk.Recognizer({
-                    model: new vosk.Model(path.join(__dirname, "vosk_models", "vosk-model-ja-0.22")),
-                    sampleRate: 48000,
-                });
-                const filledSilence = new fillSilenceStream();
-                voice.pipe(filledSilence);
-                filledSilence.pipe(fs.createWriteStream(path.join(__dirname, "temp", `${member.id}.pcm`)));
-                filledSilence.on("data", async (data: Buffer) => {
-                    if (recognizer.acceptWaveform(data)) {
-                        const result = recognizer.result().text.replace(/ /g, "").replace(/。/g, "。\n").trim();
-                        if (result === "") return;
-                        webhook.send(result.slice(0, 1000) + (result.length > 1000 ? "…" : ""));
-                    }
-                });
-            });
-        }
-        break;
     }
 });
 
