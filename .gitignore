@@ -138,3 +138,6 @@ vosk_models
 # temp files
 temp/
 temp/*
+
+# MacOS Finder files
+.DS_Store
