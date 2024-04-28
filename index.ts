@@ -565,7 +565,7 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
             if (!oldState.channel && newState.channel) {
                 if (newState.member?.user.bot) return;
                 if (voiceChannels.get(interaction.guildId as string).recognition.recognizing.find((recognizing: { member: GuildMember }) => recognizing.member.id === newState.member?.id)) return;
-                const { webhook, recognizer, voice, filledSilence } = await addSpeechRecognizeMember(newState.member as GuildMember, interaction.guildId as string, voiceChannels.get(interaction.guildId as string).channel);
+                const { webhook, recognizer, voice, filledSilence } = await addSpeechRecognizeMember(newState.member as GuildMember, interaction.guildId as string, interaction.channel as BaseGuildTextChannel);
                 voiceChannels.get(interaction.guildId as string).recognition.recognizing.push({
                     member: newState.member as GuildMember,
                     webhook,
