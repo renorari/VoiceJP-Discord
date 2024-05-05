@@ -8,6 +8,7 @@ import * as prism from "prism-media";
 import * as vosk from "vosk";
 import dotenv from "dotenv";
 import { generateVoice } from "./speech";
+import web from "./web";
 dotenv.config();
 
 if (!fs.existsSync(path.join(__dirname, "temp"))) {
@@ -17,6 +18,11 @@ if (!fs.existsSync(path.join(__dirname, "temp"))) {
         fs.unlinkSync(path.join(__dirname, "temp", file));
     });
 }
+
+const webPort = process.env.PORT || 3000;
+web.listen(webPort, () => {
+    console.log(`Web server is listening on http://localhost:${webPort}`);
+});
 
 const voiceModels = JSON.parse(fs.readFileSync(path.join(__dirname, "voice_models/models.json"), "utf-8"));
 const voskModel = new vosk.Model(path.join(__dirname, "vosk_models", "vosk-model-ja-0.22"));
