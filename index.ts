@@ -682,7 +682,7 @@ client.on("guildCreate", async (guild) => {
         "embeds": [
             new EmbedBuilder()
                 .setTitle("VoiceJPを追加していただきありがとうございます")
-                .setDescription(`VoiceJPは、日本語で音声読み上げと文字起こしができるDiscord Botです。\n\n詳しい使い方は、</help:${(await client.application?.commands.fetch())?.find((command) => command.name === "help")?.id}>をご覧ください。`)
+                .setDescription(`VoiceJPは、日本語で音声読み上げと文字起こしができるDiscordアプリです。\n\n詳しい使い方は、</help:${(await client.application?.commands.fetch())?.find((command) => command.name === "help")?.id}>をご覧いただくか、[公式ウェブサイト](https://voicejp.renorari.net/)をご覧ください。`)
                 .setColor(Colors.LuminousVividPink)
                 .setImage(client.user?.banner as string)
                 .setFooter({
