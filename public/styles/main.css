@@ -65,7 +65,11 @@ nav {
     padding: 1rem;
     background: var(--primary-color);
     color: var(--button-color);
+}
 
+h1>a {
+    color: var(--button-color);
+    text-decoration: none;
 }
 
 header {
