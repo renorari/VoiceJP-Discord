@@ -288,6 +288,10 @@ class FillSilenceStream extends stream.Transform {
     _read() { }
 }
 
+function nrCheck(id: string) {
+    return Object.keys(nrUsers).includes(id) || Object.keys(nrGuilds).includes(id) || Object.keys(ugcMutedUsers).includes(id) || Object.keys(ugcMutedGuilds).includes(id) || Object.keys(takasumibotMuted).includes(id);
+}
+
 async function disableVoice(guildId: string) {
     if (!voiceChannels.has(guildId)) return;
     await disableSpeechSynthesis(guildId);
@@ -525,6 +529,7 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
             return;
         }
         const onMessageCreate = async (message: Message) => {
+            if (nrCheck(message.author.id) || nrCheck(message.guildId as string)) return;
             if (message.author.bot) return;
             if (message.channel.id !== voiceChannels.get(interaction.guildId as string)?.synthesis?.channel) return;
             if (message.content.length > 100 || message.content == "") return;
@@ -596,6 +601,7 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
             });
         });
         const onVoiceStateUpdate = async (oldState: VoiceState, newState: VoiceState) => {
+            if (nrCheck(oldState.member?.id as string) || nrCheck(newState.member?.id as string)) return;
             if (!oldState.channel && newState.channel) {
                 if (newState.member?.user.bot) return;
                 if (voiceChannels.get(interaction.guildId as string).recognition.recognizing.find((recognizing: { member: GuildMember }) => recognizing.member.id === newState.member?.id)) return;
@@ -652,11 +658,6 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
         });
     }
 });
-
-
-function nrCheck(id: string) {
-    return Object.keys(nrUsers).includes(id) || Object.keys(nrGuilds).includes(id) || Object.keys(ugcMutedUsers).includes(id) || Object.keys(ugcMutedGuilds).includes(id) || Object.keys(takasumibotMuted).includes(id);
-}
 
 client.on("interactionCreate", async interaction => {
     if (nrCheck(interaction.user.id) || nrCheck(interaction.guildId as string)) return;
