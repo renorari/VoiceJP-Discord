@@ -19,6 +19,34 @@ if (!fs.existsSync(path.join(__dirname, "temp"))) {
     });
 }
 
+
+interface UserCollection {
+    [key: string]: {
+        userId: string;
+        reason: string;
+    };
+}
+
+let nrUsers: UserCollection = {};
+let nrGuilds: UserCollection = {};
+let ugcMutedUsers: UserCollection = {};
+let ugcMutedGuilds: UserCollection = {};
+let takasumibotMuted: UserCollection = {};
+async function blockedUserCollectionUpdate() {
+    nrUsers = await fetch("https://kana.renorari.net/api/v2/discord/nr_users").then((response) => response.json());
+    nrGuilds = await fetch("https://kana.renorari.net/api/v2/discord/nr_guilds").then((response) => response.json());
+    ugcMutedUsers = await fetch("https://kana.renorari.net/api/v2/discord/muted_users").then((response) => response.json());
+    ugcMutedGuilds = await fetch("https://kana.renorari.net/api/v2/discord/muted_guilds").then((response) => response.json());
+    takasumibotMuted = {};
+    fetch("https://api.takasumibot.com/v1/mute_user").then((response) => response.json()).then((json: { success: boolean; message: string | null; data: { id: string; reason: string; time: string; }[]; }) => {
+        json.data.forEach((user) => {
+            takasumibotMuted[user.id] = { userId: user.id, reason: user.reason };
+        });
+    });
+}
+blockedUserCollectionUpdate();
+setInterval(blockedUserCollectionUpdate, 1000 * 60);
+
 const webPort = process.env.PORT || 3000;
 web.listen(webPort, () => {
     console.log(`Web server is listening on http://localhost:${webPort}`);
@@ -626,7 +654,12 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
 });
 
 
+function nrCheck(id: string) {
+    return Object.keys(nrUsers).includes(id) || Object.keys(nrGuilds).includes(id) || Object.keys(ugcMutedUsers).includes(id) || Object.keys(ugcMutedGuilds).includes(id) || Object.keys(takasumibotMuted).includes(id);
+}
+
 client.on("interactionCreate", async interaction => {
+    if (nrCheck(interaction.user.id) || nrCheck(interaction.guildId as string)) return;
     if (!interaction.isCommand()) return;
     if (!interaction.member) {
         await interaction.reply("申し訳ございませんが、DMでは使用できません。");
@@ -651,6 +684,7 @@ client.on("interactionCreate", async interaction => {
 });
 
 client.on("interactionCreate", async interaction => {
+    if (nrCheck(interaction.user.id) || nrCheck(interaction.guildId as string)) return;
     if (!interaction.isButton()) return;
     if (interaction.customId.startsWith("help-")) {
         const page = Number(interaction.customId.split("-")[1]);
@@ -677,6 +711,9 @@ client.on("interactionCreate", async interaction => {
 });
 
 client.on("guildCreate", async (guild) => {
+    if (nrCheck(guild.id)) {
+        await guild.leave();
+    }
     guild.systemChannel?.send({
         "content": "VoiceJPを追加していただきありがとうございます。",
         "embeds": [
