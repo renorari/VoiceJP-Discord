@@ -460,7 +460,6 @@ async function addSpeechRecognizeMember(member: GuildMember, guildId: string, ch
     });
     const filledSilence = new FillSilenceStream();
     voice.pipe(filledSilence);
-    filledSilence.pipe(fs.createWriteStream(path.join(__dirname, "temp", `${member.id}.pcm`)));
     filledSilence.on("data", async (data: Buffer) => {
         if (recognizer.acceptWaveform(data)) {
             const result = recognizer.result().text.replace(/ /g, "").replace(/。/g, "。\n").trim();
