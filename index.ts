@@ -144,7 +144,7 @@ const helpPages = [
     () => {
         return new EmbedBuilder()
             .setTitle("使い方 - おわり")
-            .setDescription("VoiceJPの使い方は以上です。\n何かご不明な点がございましたら、[開発者Discordサーバー](https://discord.gg/VSHknmX7C4)にお問い合わせください。")
+            .setDescription("VoiceJPの使い方は以上です。\n何かご不明な点がございましたら、[開発者Discordサーバー](https://discord.gg/VSHknmX7C4)または[ホームページ](https://renorari.net/contact.html)よりお問い合わせください。")
             .setColor(Colors.LuminousVividPink)
             .setFooter({
                 "text": "VoiceJP 使い方 5/5"
@@ -169,7 +169,7 @@ const voiceChannels = new Map();
 
 function setActivity() {
     client.user?.setActivity({
-        "name": `/help | ${client.guilds.cache.size}servers | ${client.users.cache.size}users | ${client.ws.ping}ms`,
+        "name": `/help | ${client.guilds.cache.size}servers | ${client.ws.ping}ms`,
         "type": ActivityType.Custom
     });
 }
