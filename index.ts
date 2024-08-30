@@ -293,10 +293,10 @@ function nrCheck(id: string) {
 }
 
 async function disableVoice(guildId: string) {
+    clearInterval(voiceChannels.get(guildId).checker);
     if (!voiceChannels.has(guildId)) return;
     await disableSpeechSynthesis(guildId);
     voiceChannels.get(guildId).connection.destroy();
-    clearInterval(voiceChannels.get(guildId).checker);
     voiceChannels.delete(guildId);
 }
 async function disableSpeechSynthesis(guildId: string) {
@@ -407,7 +407,7 @@ interactionCommands.set("join", async (interaction: ChatInputCommandInteraction)
                     }]
                 });
             }
-        });
+        }, 5000);
     });
     await interaction.reply({
         "content": "ボイスチャンネルに参加しました。",
