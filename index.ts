@@ -293,8 +293,8 @@ function nrCheck(id: string) {
 }
 
 async function disableVoice(guildId: string) {
-    clearInterval(voiceChannels.get(guildId).checker);
     if (!voiceChannels.has(guildId)) return;
+    clearInterval(voiceChannels.get(guildId).checker);
     await disableSpeechSynthesis(guildId);
     voiceChannels.get(guildId).connection.destroy();
     voiceChannels.delete(guildId);
