@@ -395,8 +395,9 @@ interactionCommands.set("join", async (interaction: ChatInputCommandInteraction)
     voiceChannels.set(interaction.guildId as string, { connection, player, channel });
     connection.on(VoiceConnectionStatus.Ready, () => {
         player.play(soundEffects.join());
-        voiceChannels.get(interaction.guildId as string).checker = setInterval(async () => {
+        const checker = setInterval(async () => {
             if ((channel?.members as Collection<string, GuildMember>).size <= 1) {
+                clearInterval(checker);
                 await disableVoice(interaction.guildId as string);
                 interaction.channel?.send({
                     "content": "ボイスチャンネルから退出しました。",
@@ -408,6 +409,7 @@ interactionCommands.set("join", async (interaction: ChatInputCommandInteraction)
                 });
             }
         }, 5000);
+        voiceChannels.get(interaction.guildId as string).checker = checker;
     });
     await interaction.reply({
         "content": "ボイスチャンネルに参加しました。",
