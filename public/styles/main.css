@@ -205,6 +205,11 @@ section:last-child::before {
     z-index: -1;
 }
 
+ul {
+    padding-left: inherit;
+    padding-right: inherit;
+}
+
 footer {
     display: flex;
     align-items: center;
