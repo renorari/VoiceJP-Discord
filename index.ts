@@ -144,7 +144,7 @@ const helpPages = [
     () => {
         return new EmbedBuilder()
             .setTitle("使い方 - おわり")
-            .setDescription("VoiceJPの使い方は以上です。\n何かご不明な点がございましたら、[開発者Discordサーバー](https://discord.gg/VSHknmX7C4)または[ホームページ](https://renorari.net/contact.html)よりお問い合わせください。")
+            .setDescription("VoiceJPの使い方は以上です。\n何かご不明な点がございましたら、[開発者Discordサーバー](https://discord.gg/VSHknmX7C4)または[ホームページ](https://renorari.net/contact.html)よりお問い合わせください。\n\n利用規約とプライバシポリシは以下のリンクより、ご覧ください。\n[利用規約 - VoiceJP公式ウェブサイト](https://voicejp.renorari.net/terms.html)\n[プライバシポリシ - renorari.net](https://renorari.net/privacy.html)")
             .setColor(Colors.LuminousVividPink)
             .setFooter({
                 "text": "VoiceJP 使い方 5/5"
