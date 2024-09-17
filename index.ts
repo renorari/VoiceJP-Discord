@@ -602,7 +602,10 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
             });
         });
         const onVoiceStateUpdate = async (oldState: VoiceState, newState: VoiceState) => {
+            if (nrCheck(oldState.guild.id) || nrCheck(newState.guild.id)) return;
             if (nrCheck(oldState.member?.id as string) || nrCheck(newState.member?.id as string)) return;
+            if (oldState.guild.id !== interaction.guildId) return;
+            if (newState.guild.id !== interaction.guildId) return;
             if (!oldState.channel && newState.channel) {
                 if (newState.member?.user.bot) return;
                 if (voiceChannels.get(interaction.guildId as string).recognition.recognizing.find((recognizing: { member: GuildMember }) => recognizing.member.id === newState.member?.id)) return;
