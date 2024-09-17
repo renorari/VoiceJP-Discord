@@ -480,10 +480,10 @@ async function addSpeechRecognizeMember(member: GuildMember, guildId: string, ch
 async function removeSpeechRecognizeMember(member: GuildMember, guildId: string) {
     const recognizingMember = voiceChannels.get(guildId).recognition.recognizing.find((recognizing: { member: GuildMember }) => recognizing.member.id === member.id);
     if (!recognizingMember) return;
-    recognizingMember.voice.destroy();
+    recognizingMember.webhook.delete();
     recognizingMember.filledSilence.destroy();
     recognizingMember.recognizer.free();
-    recognizingMember.webhook.delete();
+    recognizingMember.voice.destroy();
     voiceChannels.get(guildId).recognition.recognizing.splice(voiceChannels.get(guildId).recognition.recognizing.indexOf(recognizingMember), 1);
 }
 
