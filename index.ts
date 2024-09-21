@@ -535,9 +535,10 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
             if (message.channel.id !== voiceChannels.get(interaction.guildId as string)?.synthesis?.channel) return;
             if (message.content.length > 100 || message.content == "") return;
             const filePath = path.join(__dirname, "temp", `${message.id}`);
+            const username = message.member?.displayName ? message.member.displayName : message.author.username;
             const generatedVoice = await generateVoice(
                 // eslint-disable-next-line no-useless-escape
-                `${message.member?.displayName ? message.member.displayName : message.author.username}。${message.cleanContent.replace(/https?:\/\/[\w/:%#\$&\?\(\)~\.=\+\-]+/g, "URL省略")}`,
+                `${username.slice(0, 5)}。${message.cleanContent.replace(/https?:\/\/[\w/:%#\$&\?\(\)~\.=\+\-]+/g, "URL省略")}`,
                 filePath,
                 path.join(__dirname, "voice_models", voiceModel.file),
                 voiceChannels.get(interaction.guildId as string).synthesis.speed,
