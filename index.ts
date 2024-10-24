@@ -1,5 +1,8 @@
 /* VoiceJP Main Script */
 
+import "./includes/folder_manager";
+import "./includes/web";
+
 import {
     ActionRowBuilder, ActivityType, BaseGuildTextChannel, ButtonBuilder, ButtonStyle, ChannelType,
     ChatInputCommandInteraction, Client, Collection, Colors, EmbedBuilder, GuildMember,
@@ -10,7 +13,6 @@ import {
 import dotenv from "dotenv";
 import fs from "node:fs";
 import path from "node:path";
-import stream from "node:stream";
 import * as prism from "prism-media";
 import * as vosk from "vosk";
 
@@ -19,26 +21,11 @@ import {
     VoiceConnectionStatus
 } from "@discordjs/voice";
 
+import FillSilenceStream from "./models/fill_silence_stream";
+import UserCollection from "./models/user_collection";
 import { generateVoice } from "./speech";
-import web from "./web";
 
 dotenv.config();
-
-if (!fs.existsSync(path.join(__dirname, "temp"))) {
-    fs.mkdirSync(path.join(__dirname, "temp"));
-} else {
-    fs.readdirSync(path.join(__dirname, "temp")).forEach((file) => {
-        fs.unlinkSync(path.join(__dirname, "temp", file));
-    });
-}
-
-
-interface UserCollection {
-    [key: string]: {
-        userId: string;
-        reason: string;
-    };
-}
 
 let nrUsers: UserCollection = {};
 let nrGuilds: UserCollection = {};
@@ -63,11 +50,6 @@ async function blockedUserCollectionUpdate() {
 }
 blockedUserCollectionUpdate();
 setInterval(blockedUserCollectionUpdate, 1000 * 60);
-
-const webPort = process.env.PORT || 3000;
-web.listen(webPort, () => {
-    console.log(`Web server is listening on http://localhost:${webPort}`);
-});
 
 const voiceModels = JSON.parse(fs.readFileSync(path.join(__dirname, "voice_models/models.json"), "utf-8"));
 const voskModel = new vosk.Model(path.join(__dirname, "vosk_models", "vosk-model-ja-0.22"));
@@ -280,30 +262,6 @@ client.on("ready", async () => {
     setActivity();
     setInterval(setActivity, 1000 * 10);
 });
-
-class FillSilenceStream extends stream.Transform {
-    current: Buffer[];
-    interval: NodeJS.Timeout;
-
-    constructor(rate: number = 48000, channels: number = 1, frameSize: number = 960) {
-        super();
-        this.current = [];
-        this.interval = setInterval(() => {
-            if (this.current.length === 0) {
-                this.push(Buffer.alloc(frameSize * 2 * channels));
-            } else {
-                this.push(this.current.shift());
-            }
-        }, 1000 / (rate / frameSize));
-    }
-
-    _write(chunk: Buffer, encoding: BufferEncoding, callback: (error?: Error | null | undefined) => void): void {
-        this.current.push(chunk);
-        callback();
-    }
-
-    _read() { }
-}
 
 function nrCheck(id: string) {
     return Object.keys(nrUsers).includes(id) || Object.keys(nrGuilds).includes(id) || Object.keys(ugcMutedUsers).includes(id) || Object.keys(ugcMutedGuilds).includes(id) || Object.keys(takasumibotMuted).includes(id);
