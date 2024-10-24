@@ -16,14 +16,14 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: var(--background);
-    color: var(--text-color);
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background);
+    font-family: Arial, sans-serif;
+    color: var(--text-color);
 }
 
 main {
@@ -35,8 +35,8 @@ main {
     display: inline-block;
     margin: 0.5rem;
     padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
     border: 1px solid var(--primary-color);
+    border-radius: 0.25rem;
     color: var(--primary-color);
     text-decoration: none;
 }
@@ -73,27 +73,27 @@ h1>a {
 }
 
 header {
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.25);
-    color: #fff;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 2rem;
     position: relative;
+    height: 100vh;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.25);
+    color: #fff;
 }
 
 header::before {
     content: "";
     position: absolute;
+    z-index: -1;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background-image: url("/images/header.jpg");
-    background-size: cover;
     background-position: center;
-    z-index: -1;
+    background-size: cover;
 }
 
 header #header-content {
@@ -105,16 +105,16 @@ header .button-primary,
 section:last-child .button-primary {
     margin-top: 1rem;
     background: #fff;
-    color: #000;
     border-color: transparent;
+    color: #000;
 }
 
 header .button-secondary,
 section:last-child .button-secondary {
     margin-top: 1rem;
     background: transparent;
-    color: #fff;
     border-color: #fff;
+    color: #fff;
 }
 
 section {
@@ -124,8 +124,8 @@ section {
 
 .section-head {
     width: 100%;
-    text-align: center;
     margin-bottom: 1rem;
+    text-align: center;
 }
 
 section:first-child {
@@ -134,30 +134,30 @@ section:first-child {
 
 .cards {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: stretch;
-    flex-wrap: wrap;
     gap: 1rem;
 }
 
 .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
     width: 100%;
     min-height: 8rem;
     padding: 1rem;
     background-color: #fff;
     border-radius: 0.25rem;
     text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    position: relative;
 }
 
 .card img {
+    display: inline-block;
     width: 3rem;
     height: 3rem;
-    display: inline-block;
 }
 
 .card-2 {
@@ -179,35 +179,35 @@ section:first-child {
     position: absolute;
     top: 100%;
     left: 50%;
-    background: url("/icons/arrow-down.svg") no-repeat;
-    background-size: contain;
+    transform: translateX(-50%);
     width: 2rem;
     height: 2rem;
-    transform: translateX(-50%);
+    background: url("/icons/arrow-down.svg") no-repeat;
+    background-size: contain;
 }
 
 section:last-child {
+    position: relative;
     background: rgba(0, 0, 0, 0.25);
     color: #fff;
-    position: relative;
 }
 
 section:last-child::before {
     content: "";
     position: absolute;
+    z-index: -1;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background-image: url("/images/invite-background.jpg");
-    background-size: cover;
     background-position: center;
-    z-index: -1;
+    background-size: cover;
 }
 
 ul {
-    padding-left: inherit;
     padding-right: inherit;
+    padding-left: inherit;
 }
 
 footer {
@@ -215,8 +215,8 @@ footer {
     align-items: center;
     padding: 1rem;
     background: var(--footer-background);
-    color: var(--footer-text);
     font-weight: lighter;
+    color: var(--footer-text);
 }
 
 footer a {
@@ -232,14 +232,13 @@ footer ul {
 }
 
 footer div {
-    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
+    flex: 1;
 }
 
 @media screen and (max-width: 20rem) {
-
     .card-2,
     .card-3 {
         width: 100%;
