@@ -102,4 +102,4 @@ function unlinkPromise(filePath: string): Promise<void> {
 }
 
 
-export { generateVoice };
+export default generateVoice;

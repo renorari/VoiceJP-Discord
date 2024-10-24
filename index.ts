@@ -21,35 +21,11 @@ import {
     VoiceConnectionStatus
 } from "@discordjs/voice";
 
+import nrCheck from "./includes/blocked_user_check";
+import generateVoice from "./includes/speech";
 import FillSilenceStream from "./models/fill_silence_stream";
-import UserCollection from "./models/user_collection";
-import { generateVoice } from "./speech";
 
 dotenv.config();
-
-let nrUsers: UserCollection = {};
-let nrGuilds: UserCollection = {};
-let ugcMutedUsers: UserCollection = {};
-let ugcMutedGuilds: UserCollection = {};
-let takasumibotMuted: UserCollection = {};
-async function blockedUserCollectionUpdate() {
-    try {
-        nrUsers = await fetch("https://kana.renorari.net/api/v2/discord/nr_users").then((response) => response.json());
-        nrGuilds = await fetch("https://kana.renorari.net/api/v2/discord/nr_guilds").then((response) => response.json());
-        ugcMutedUsers = await fetch("https://kana.renorari.net/api/v2/discord/muted_users").then((response) => response.json());
-        ugcMutedGuilds = await fetch("https://kana.renorari.net/api/v2/discord/muted_guilds").then((response) => response.json());
-        takasumibotMuted = {};
-        fetch("https://api.takasumibot.com/v1/mute_user").then((response) => response.json()).then((json: { success: boolean; message: string | null; data: { id: string; reason: string; time: string; }[]; }) => {
-            json.data.forEach((user) => {
-                takasumibotMuted[user.id] = { userId: user.id, reason: user.reason };
-            });
-        });
-    } catch (error) {
-        console.error(error);
-    }
-}
-blockedUserCollectionUpdate();
-setInterval(blockedUserCollectionUpdate, 1000 * 60);
 
 const voiceModels = JSON.parse(fs.readFileSync(path.join(__dirname, "voice_models/models.json"), "utf-8"));
 const voskModel = new vosk.Model(path.join(__dirname, "vosk_models", "vosk-model-ja-0.22"));
@@ -262,10 +238,6 @@ client.on("ready", async () => {
     setActivity();
     setInterval(setActivity, 1000 * 10);
 });
-
-function nrCheck(id: string) {
-    return Object.keys(nrUsers).includes(id) || Object.keys(nrGuilds).includes(id) || Object.keys(ugcMutedUsers).includes(id) || Object.keys(ugcMutedGuilds).includes(id) || Object.keys(takasumibotMuted).includes(id);
-}
 
 async function disableVoice(guildId: string) {
     if (!voiceChannels.has(guildId)) return;
