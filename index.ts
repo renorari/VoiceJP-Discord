@@ -1,14 +1,27 @@
 /* VoiceJP Main Script */
+
+import {
+    ActionRowBuilder, ActivityType, BaseGuildTextChannel, ButtonBuilder, ButtonStyle, ChannelType,
+    ChatInputCommandInteraction, Client, Collection, Colors, EmbedBuilder, GuildMember,
+    IntentsBitField, Message, PermissionFlagsBits, REST, Routes, SlashCommandBuilder,
+    SlashCommandChannelOption, SlashCommandStringOption, SlashCommandSubcommandBuilder, VoiceState,
+    Webhook
+} from "discord.js";
+import dotenv from "dotenv";
 import fs from "node:fs";
 import path from "node:path";
 import stream from "node:stream";
-import { EndBehaviorType, StreamType, VoiceConnectionStatus, createAudioPlayer, createAudioResource, joinVoiceChannel } from "@discordjs/voice";
-import { REST, Routes, Client, IntentsBitField, SlashCommandBuilder, Colors, ActivityType, PermissionFlagsBits, SlashCommandSubcommandBuilder, SlashCommandStringOption, SlashCommandChannelOption, ChannelType, Message, ChatInputCommandInteraction, Collection, GuildMember, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Webhook, BaseGuildTextChannel, VoiceState } from "discord.js";
 import * as prism from "prism-media";
 import * as vosk from "vosk";
-import dotenv from "dotenv";
+
+import {
+    createAudioPlayer, createAudioResource, EndBehaviorType, joinVoiceChannel, StreamType,
+    VoiceConnectionStatus
+} from "@discordjs/voice";
+
 import { generateVoice } from "./speech";
 import web from "./web";
+
 dotenv.config();
 
 if (!fs.existsSync(path.join(__dirname, "temp"))) {
