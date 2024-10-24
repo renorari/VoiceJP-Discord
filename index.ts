@@ -46,16 +46,20 @@ let ugcMutedUsers: UserCollection = {};
 let ugcMutedGuilds: UserCollection = {};
 let takasumibotMuted: UserCollection = {};
 async function blockedUserCollectionUpdate() {
-    nrUsers = await fetch("https://kana.renorari.net/api/v2/discord/nr_users").then((response) => response.json());
-    nrGuilds = await fetch("https://kana.renorari.net/api/v2/discord/nr_guilds").then((response) => response.json());
-    ugcMutedUsers = await fetch("https://kana.renorari.net/api/v2/discord/muted_users").then((response) => response.json());
-    ugcMutedGuilds = await fetch("https://kana.renorari.net/api/v2/discord/muted_guilds").then((response) => response.json());
-    takasumibotMuted = {};
-    fetch("https://api.takasumibot.com/v1/mute_user").then((response) => response.json()).then((json: { success: boolean; message: string | null; data: { id: string; reason: string; time: string; }[]; }) => {
-        json.data.forEach((user) => {
-            takasumibotMuted[user.id] = { userId: user.id, reason: user.reason };
+    try {
+        nrUsers = await fetch("https://kana.renorari.net/api/v2/discord/nr_users").then((response) => response.json());
+        nrGuilds = await fetch("https://kana.renorari.net/api/v2/discord/nr_guilds").then((response) => response.json());
+        ugcMutedUsers = await fetch("https://kana.renorari.net/api/v2/discord/muted_users").then((response) => response.json());
+        ugcMutedGuilds = await fetch("https://kana.renorari.net/api/v2/discord/muted_guilds").then((response) => response.json());
+        takasumibotMuted = {};
+        fetch("https://api.takasumibot.com/v1/mute_user").then((response) => response.json()).then((json: { success: boolean; message: string | null; data: { id: string; reason: string; time: string; }[]; }) => {
+            json.data.forEach((user) => {
+                takasumibotMuted[user.id] = { userId: user.id, reason: user.reason };
+            });
         });
-    });
+    } catch (error) {
+        console.error(error);
+    }
 }
 blockedUserCollectionUpdate();
 setInterval(blockedUserCollectionUpdate, 1000 * 60);
