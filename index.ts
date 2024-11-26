@@ -144,7 +144,7 @@ const voiceChannels = new Map();
 
 function setActivity() {
     client.user?.setActivity({
-        "name": `/help | ${client.guilds.cache.size}servers | ${client.ws.ping}ms`,
+        "name": `/help | ${client.guilds.cache.size}servers | joining ${voiceChannels.size}channels | ${client.ws.ping}ms`,
         "type": ActivityType.Custom
     });
 }
