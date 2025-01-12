@@ -1,13 +1,18 @@
 /* Voice API */
-import path from "node:path";
-import fs from "node:fs";
+import "dotenv/config";
+
 import childProcess from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+
+import romajiToKana from "./romaji";
+
 const osDicMap: Record<string, string> = {
     win32: "C:/open_jtalk/dic",
     darwin: "/opt/homebrew/opt/open-jtalk/dic",
     linux: "/var/lib/mecab/dic/open-jtalk/naist-jdic"
 };
-const dic = osDicMap[process.platform] ?? osDicMap.linux;
+const dic = process.env.JTALK_DICT ?? osDicMap[process.platform] ?? osDicMap.linux;
 
 interface VoiceDictionary {
     [key: string]: string;
@@ -45,12 +50,14 @@ const dictionary: VoiceDictionary = fs.readFileSync(path.join(__dirname, "dictio
     });
 }*/
 
-async function generateVoice(text:string, filepath:string, model:string, speed:number, tone:number, intonation:number, volume:number, between:number): Promise<string> {
+async function generateVoice(text: string, filepath: string, model: string, speed: number, tone: number, intonation: number, volume: number, between: number): Promise<string> {
     if (!speed) throw new Error("Speed is not defined");
 
     const processedText = //await englishToKatakana(
-        text.toLowerCase()
-            .replace(new RegExp(Object.keys(dictionary).join("|"), "g"), (match) => dictionary[match]);
+        romajiToKana(
+            text.toLowerCase()
+                .replace(new RegExp(Object.keys(dictionary).join("|"), "g"), (match) => dictionary[match])
+        );
     //);
 
     const texts: string[] = processedText
