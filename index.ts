@@ -330,6 +330,11 @@ interactionCommands.set("join", async (interaction: ChatInputCommandInteraction)
         return;
     }
     await disableVoice(interaction.guildId as string);
+    await Promise.all((await channel.fetchWebhooks()).map(async (webhook: Webhook) => {
+        if (webhook.name.endsWith("[VoiceJP]")) {
+            await webhook.delete();
+        }
+    }));
     const connection = joinVoiceChannel({
         channelId: channel.id,
         guildId: channel.guild.id,
@@ -539,7 +544,31 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
             recognitionMembers.set(member.id, member);
         });
         const recognizing: { member: GuildMember; webhook: Webhook; recognizer: vosk.Recognizer<(vosk.Without<vosk.SpeakerRecognizerParam, Partial<vosk.GrammarRecognizerParam>> & Partial<vosk.GrammarRecognizerParam>) | (vosk.Without<Partial<vosk.GrammarRecognizerParam>, vosk.SpeakerRecognizerParam> & vosk.SpeakerRecognizerParam)>; voice: prism.opus.Decoder; filledSilence: FillSilenceStream; }[] = [];
+        if (recognitionMembers.size > 10) {
+            await interaction.reply({
+                "content": "エラーが発生しました。",
+                "embeds": [{
+                    "title": "エラー",
+                    "description": "音声認識の上限(10人)を超えています。",
+                    "color": Colors.Red
+                }],
+                "ephemeral": true
+            });
+            return;
+        }
         recognitionMembers.forEach(async (member: GuildMember) => {
+            if ((await (interaction.channel as BaseGuildTextChannel).fetchWebhooks()).size >= 10) {
+                await interaction.reply({
+                    "content": "エラーが発生しました。",
+                    "embeds": [{
+                        "title": "エラー",
+                        "description": "Webhookの上限に達しました。",
+                        "color": Colors.Red
+                    }],
+                    "ephemeral": true
+                });
+                return;
+            }
             const { webhook, recognizer, voice, filledSilence } = await addSpeechRecognizeMember(member, interaction.guildId as string, interaction.channel as BaseGuildTextChannel);
             recognizing.push({
                 member,
@@ -557,6 +586,17 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
             if (!oldState.channel && newState.channel) {
                 if (newState.member?.user.bot) return;
                 if (voiceChannels.get(interaction.guildId as string).recognition.recognizing.find((recognizing: { member: GuildMember }) => recognizing.member.id === newState.member?.id)) return;
+                if ((await (interaction.channel as BaseGuildTextChannel).fetchWebhooks()).size >= 10) {
+                    await interaction.followUp({
+                        "content": "エラーが発生しました。",
+                        "embeds": [{
+                            "title": "エラー",
+                            "description": "Webhookの上限に達しました。",
+                            "color": Colors.Red
+                        }]
+                    });
+                    return;
+                }
                 const { webhook, recognizer, voice, filledSilence } = await addSpeechRecognizeMember(newState.member as GuildMember, interaction.guildId as string, interaction.channel as BaseGuildTextChannel);
                 voiceChannels.get(interaction.guildId as string).recognition.recognizing.push({
                     member: newState.member as GuildMember,
