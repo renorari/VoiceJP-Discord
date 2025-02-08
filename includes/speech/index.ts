@@ -26,39 +26,14 @@ const dictionary: VoiceDictionary = fs.readFileSync(path.join(__dirname, "dictio
         return obj;
     }, {});
 
-/*function englishToKatakana(text: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-        fetch("https://www.sljfaq.org/cgi/e2k_ja.cgi?o=json&lang=ja&word=" + encodeURIComponent(text))
-            .then((response) => response.json())
-            .then((data) => {
-                try {
-                    let outputText = text;
-                    for (const wordObj of data.words) {
-                        if (wordObj.j_pron_only) {
-                            const regex = new RegExp("\\b" + wordObj.word + "\\b", "g");
-                            outputText = outputText.replace(regex, wordObj.j_pron_only);
-                        }
-                    }
-                    resolve(outputText);
-                } catch (error) {
-                    resolve(text);
-                }
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
-}*/
 
 async function generateVoice(text: string, filepath: string, model: string, speed: number, tone: number, intonation: number, volume: number, between: number): Promise<string> {
     if (!speed) throw new Error("Speed is not defined");
 
-    const processedText = //await englishToKatakana(
-        romajiToKana(
-            text.toLowerCase()
-                .replace(new RegExp(Object.keys(dictionary).join("|"), "g"), (match) => dictionary[match])
-        );
-    //);
+    const processedText = romajiToKana(
+        text.toLowerCase()
+            .replace(new RegExp(Object.keys(dictionary).join("|"), "g"), (match) => dictionary[match])
+    );
 
     const texts: string[] = processedText
         .trim()

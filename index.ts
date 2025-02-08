@@ -490,7 +490,7 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
             const username = message.member?.displayName ? message.member.displayName : message.author.username;
             const generatedVoice = await generateVoice(
                 // eslint-disable-next-line no-useless-escape
-                `${username.slice(0, 5)}。${message.cleanContent.replace(/https?:\/\/[\w/:%#\$&\?\(\)~\.=\+\-]+/g, "URL省略")}`,
+                `${username.slice(0, 5)}。${message.cleanContent.replace(/https?:\/\/[\w/:%#\$&\?\(\)~\.=\+\-]+/g, "ユーアールエル省略")}`,
                 filePath,
                 path.join(__dirname, "voice_models", voiceModel.file),
                 voiceChannels.get(interaction.guildId as string).synthesis.speed,
