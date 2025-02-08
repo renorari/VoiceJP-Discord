@@ -42,9 +42,10 @@ async function generateVoice(text: string, filepath: string, model: string, spee
     const promises = texts
         .filter((n) => n)
         .map(async (_text, index) => {
-            if (_text === "") return;
+            const processText = _text.trim();
+            if (processText === "") return;
             const filePath = path.join(`${filepath}_${index}.wav`);
-            await execPromise(`echo ${JSON.stringify(_text)} | open_jtalk -x ${dic} -m ${model} -r ${speed} -fm ${tone} -jf ${intonation} -g ${volume} -ow ${filePath}`);
+            await execPromise(`echo ${JSON.stringify(processText)} | open_jtalk -x ${dic} -m ${model} -r ${speed} -fm ${tone} -jf ${intonation} -g ${volume} -ow ${filePath}`);
             return filePath;
         });
 
