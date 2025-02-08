@@ -32,7 +32,8 @@ async function generateVoice(text: string, filepath: string, model: string, spee
 
     const processedText = text.toLowerCase()
         .replace(/[a-z]+/g, (match) => englishToKatakana(match))
-        .replace(new RegExp(Object.keys(dictionary).join("|"), "g"), (match) => dictionary[match]);
+        .replace(new RegExp(Object.keys(dictionary).join("|"), "g"), (match) => dictionary[match])
+        .replace(/(.{20})/g, "$1\n");
 
     const texts: string[] = processedText
         .trim()
