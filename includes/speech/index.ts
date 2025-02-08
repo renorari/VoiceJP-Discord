@@ -5,7 +5,7 @@ import childProcess from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
-import romajiToKana from "./romaji";
+import englishToKatakana from "./englishToKatakana";
 
 const osDicMap: Record<string, string> = {
     win32: "C:/open_jtalk/dic",
@@ -30,10 +30,9 @@ const dictionary: VoiceDictionary = fs.readFileSync(path.join(__dirname, "dictio
 async function generateVoice(text: string, filepath: string, model: string, speed: number, tone: number, intonation: number, volume: number, between: number): Promise<string> {
     if (!speed) throw new Error("Speed is not defined");
 
-    const processedText = romajiToKana(
-        text.toLowerCase()
-            .replace(new RegExp(Object.keys(dictionary).join("|"), "g"), (match) => dictionary[match])
-    );
+    const processedText = text.toLowerCase()
+        .replace(/[a-z]+/g, (match) => englishToKatakana(match))
+        .replace(new RegExp(Object.keys(dictionary).join("|"), "g"), (match) => dictionary[match]);
 
     const texts: string[] = processedText
         .trim()
