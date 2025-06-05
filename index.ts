@@ -28,7 +28,7 @@ import FillSilenceStream from "./models/fill_silence_stream";
 dotenv.config();
 
 const voiceModels = JSON.parse(fs.readFileSync(path.join(__dirname, "voice_models/models.json"), "utf-8"));
-const voskModel = new vosk.Model(path.join(__dirname, "vosk_models", "vosk-model-ja-0.22"));
+const voskModel = new vosk.Model(path.join(__dirname, "vosk_models", process.env.VOSK_MODEL as string));
 const token = process.env.TOKEN as string;
 const client = new Client({
     intents: [
