@@ -646,6 +646,10 @@ interactionCommands.set("speech", async (interaction: ChatInputCommandInteractio
                 "title": "音声認識",
                 "description": "音声認識を開始しました。",
                 "color": Colors.Green
+            }, {
+                "title": "お知らせ",
+                "description": "現在、VoiceJPは副サーバーでの音声認識を行っています。\nそのため、音声認識の精度が低下する可能性があります。\nご了承ください。",
+                "color": Colors.Yellow
             }]
         });
     }
