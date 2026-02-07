@@ -23,8 +23,8 @@ const connections: Connections = new Map();
 client.on(Events.ClientReady, readyClient => {
     logger.info(`Logged in as ${readyClient.user.tag}`);
 
-    setActivity(readyClient);
-    setInterval(() => setActivity(readyClient), 10 * 60 * 1000);
+    setActivity(readyClient, connections);
+    setInterval(() => setActivity(readyClient, connections), 10 * 60 * 1000);
 
     readyClient.application.commands.set(commands);
 });
@@ -34,7 +34,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
     switch (interaction.commandName) {
         case "ping":
-            await handlePingCommand(client, interaction);
+            await handlePingCommand(client, interaction, connections);
             break;
 
         case "join":

@@ -4,7 +4,9 @@
 
 import { Client, Colors, CommandInteraction, EmbedBuilder } from "discord.js";
 
-export default async function handlePingCommand(client: Client, interaction: CommandInteraction) {
+import type { Connections } from "../../types/index.d.ts";
+
+export default async function handlePingCommand(client: Client, interaction: CommandInteraction, connections: Connections) {
     await interaction.reply({
         "content": "ポン！",
         "embeds": [
@@ -23,6 +25,16 @@ export default async function handlePingCommand(client: Client, interaction: Com
                 .addFields({
                     "name": "Botの稼働時間",
                     "value": `<t:${Math.floor(new Date(Date.now() - client.uptime!).getTime() / 1000)}:R>`
+                })
+                .addFields({
+                    "name": "参加中のサーバー数",
+                    "value": `${client.guilds.cache.size} サーバー`,
+                    "inline": true
+                })
+                .addFields({
+                    "name": "参加中のボイスチャンネル数",
+                    "value": `${connections.size} チャンネル`,
+                    "inline": true
                 })
                 .setColor(Colors.DarkBlue)
                 .setTimestamp()
