@@ -3,6 +3,7 @@
 */
 
 import "dotenv/config";
+import "./discord/index.ts";
 
 import cors from "cors";
 import express from "express";
