@@ -2,12 +2,14 @@
     VoiceJP Discord Bot Types
 */
 
-import { Recognizer } from "vosk";
+import { Recognizer, SpeakerRecognizerParam } from "vosk";
 
 import { createAudioPlayer, joinVoiceChannel } from "@discordjs/voice";
 
 import FillSilenceStream from "../discord/utils/fill-silence";
 
+import type { AudioReceiveStream } from "@discordjs/voice";
+import type { Transform } from "node:stream";
 import type { GuildMember, Webhook } from "discord.js";
 
 export interface Connection {
@@ -31,7 +33,9 @@ export interface RecognitionChannel {
         member: GuildMember;
         webhook: Webhook;
         voice: FillSilenceStream;
-        recognizer: typeof Recognizer;
+        opusStream: AudioReceiveStream;
+        decoder: Transform;
+        recognizer: Recognizer<SpeakerRecognizerParam>;
     }>;
 }
 

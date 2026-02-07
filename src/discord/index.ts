@@ -17,6 +17,7 @@ import handleUndefinedCommand from "./handlers/commands/undefined-command.ts";
 import { handleMessageCreateEvent } from "./handlers/message.ts";
 import setActivity from "./utils/activity.ts";
 import nrCheck from "./utils/block-user.ts";
+import RecognitionChannelMap from "./utils/recognition.ts";
 
 import type { Connections, RecognitionChannels, SynthesisChannels } from "../types/index.d.ts";
 
@@ -25,7 +26,7 @@ const logger = log.getLogger("discord");
 
 const connections: Connections = new Map();
 const synthesisChannels: SynthesisChannels = new Map();
-const recognitionChannels: RecognitionChannels = new Map();
+const recognitionChannels: RecognitionChannels = new RecognitionChannelMap();
 
 client.on(Events.ClientReady, readyClient => {
     logger.info(`Logged in as ${readyClient.user.tag}`);

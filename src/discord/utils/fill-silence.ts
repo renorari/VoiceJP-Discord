@@ -25,5 +25,10 @@ export default class FillSilenceStream extends stream.Transform {
         callback();
     }
 
+    _destroy(error: Error | null, callback: (error?: Error | null) => void): void {
+        clearInterval(this.interval);
+        callback(error);
+    }
+
     _read() { }
 }

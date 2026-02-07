@@ -105,16 +105,18 @@ export default async function handleSpeechRecognitionCommand(client: Client, int
             "reason": "VoiceJPの音声認識用"
         });
 
-        const voice = connection.connection.receiver.subscribe(member.id, {
+        const opusStream = connection.connection.receiver.subscribe(member.id, {
             "end": {
                 "behavior": EndBehaviorType.Manual
             }
-        })
-            .pipe(new prism.opus.Decoder({
-                "rate": 48000,
-                "channels": 1,
-                "frameSize": 960
-            }))
+        });
+        const decoder = new prism.opus.Decoder({
+            "rate": 48000,
+            "channels": 1,
+            "frameSize": 960
+        });
+        const voice = opusStream
+            .pipe(decoder)
             .pipe(new FillSilenceStream());
 
         const recognizer = new vosk.Recognizer({
@@ -137,6 +139,8 @@ export default async function handleSpeechRecognitionCommand(client: Client, int
             member,
             webhook,
             voice,
+            opusStream,
+            decoder,
             recognizer
         });
     }
