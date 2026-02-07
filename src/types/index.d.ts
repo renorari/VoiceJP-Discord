@@ -7,10 +7,11 @@ import { Recognizer, SpeakerRecognizerParam } from "vosk";
 import { createAudioPlayer, joinVoiceChannel } from "@discordjs/voice";
 
 import FillSilenceStream from "../discord/utils/fill-silence";
+import { MemberRecognitionDataMap } from "../discord/utils/recognition";
 
 import type { AudioReceiveStream } from "@discordjs/voice";
 import type { Transform } from "node:stream";
-import type { GuildMember, Webhook } from "discord.js";
+import type { ChatInputCommandInteraction, GuildMember, Webhook } from "discord.js";
 
 export interface Connection {
     guildId: string;
@@ -26,17 +27,21 @@ export interface SynthesisChannel {
     player: ReturnType<typeof createAudioPlayer>;
 }
 
+export interface RecognitionMemberData {
+    member: GuildMember;
+    webhook: Webhook;
+    voice: FillSilenceStream;
+    opusStream: AudioReceiveStream;
+    decoder: Transform;
+    recognizer: Recognizer<SpeakerRecognizerParam>;
+}
+
 export interface RecognitionChannel {
     guildId: string;
+    textChannelId: string;
     voiceChannelId: string;
-    members: Map<string, {
-        member: GuildMember;
-        webhook: Webhook;
-        voice: FillSilenceStream;
-        opusStream: AudioReceiveStream;
-        decoder: Transform;
-        recognizer: Recognizer<SpeakerRecognizerParam>;
-    }>;
+    interaction: ChatInputCommandInteraction;
+    members: MemberRecognitionDataMap;
 }
 
 export type Connections = Map<string, Connection>;

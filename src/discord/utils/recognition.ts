@@ -4,7 +4,7 @@
 
 import log from "../../utils/logger.ts";
 
-import type { RecognitionChannel } from "../../types/index.d.ts";
+import type { RecognitionChannel, RecognitionMemberData } from "../../types/index.d.ts";
 
 const logger = log.getLogger();
 
@@ -34,7 +34,7 @@ export async function cleanupRecognitionChannel(channel?: RecognitionChannel): P
         safeDestroy(voice);
         safeFree(recognizer);
         if (webhook) {
-            deletions.push(webhook.delete("VoiceJP recognition cleanup").catch(() => undefined));
+            deletions.push(webhook.delete("不要なVoiceJPのWebhookを削除").catch(() => undefined));
         }
     }
 
@@ -50,6 +50,28 @@ export default class RecognitionChannelMap extends Map<string, RecognitionChanne
             void cleanupRecognitionChannel(channel).catch(error => {
                 logger.warn(`guild: ${key} ${error instanceof Error ? error.message : String(error)}`);
             });
+        }
+        return super.delete(key);
+    }
+
+    clear(): void {
+        for (const key of this.keys()) {
+            this.delete(key);
+        }
+    }
+}
+
+export class MemberRecognitionDataMap extends Map<string, RecognitionMemberData> {
+    delete(key: string): boolean {
+        const data = this.get(key);
+        if (data) {
+            safeDestroy(data.opusStream);
+            safeDestroy(data.decoder);
+            safeDestroy(data.voice);
+            safeFree(data.recognizer);
+            if (data.webhook) {
+                void data.webhook.delete("不要なVoiceJPのWebhookを削除").catch(() => undefined);
+            }
         }
         return super.delete(key);
     }
