@@ -4,10 +4,10 @@
 
 import { ChatInputCommandInteraction, Client, MessageFlags } from "discord.js";
 
-import type { Connections } from "../../types/index.d.ts";
+import type { Connections } from "../../../types/index.d.ts";
 
 export async function handleLeaveCommand(client: Client, interaction: ChatInputCommandInteraction, connections: Connections) {
-    if (!interaction.guildId) {
+    if (!interaction.guildId || !interaction.guild) {
         await interaction.reply({
             "content": "このコマンドはサーバー内でのみ使用できます。",
             "flags": [MessageFlags.Ephemeral]
@@ -17,7 +17,7 @@ export async function handleLeaveCommand(client: Client, interaction: ChatInputC
 
     const connection = connections.get(interaction.guildId);
     if (connection) {
-        connection.destroy();
+        connection.connection.destroy();
         connections.delete(interaction.guildId);
         await interaction.reply({
             "content": "ボイスチャンネルから退出しました。",

@@ -6,7 +6,7 @@ import { ChannelType, ChatInputCommandInteraction, Client, MessageFlags } from "
 
 import { entersState, joinVoiceChannel, VoiceConnectionStatus } from "@discordjs/voice";
 
-import type { Connections } from "../../types/index.d.ts";
+import type { Connections } from "../../../types/index.d.ts";
 
 export async function handleJoinCommand(client: Client, interaction: ChatInputCommandInteraction, connections: Connections) {
     if (!interaction.guildId || !interaction.guild) {
@@ -37,7 +37,11 @@ export async function handleJoinCommand(client: Client, interaction: ChatInputCo
     });
 
     connection.on(VoiceConnectionStatus.Ready, async () => {
-        connections.set(interaction.guildId!, connection);
+        connections.set(interaction.guildId!, {
+            "guildId": interaction.guildId!,
+            "channelId": channel.id,
+            "connection": connection
+        });
         await interaction.editReply({
             "content": `ボイスチャンネル <#${channel.id}> に参加しました。`
         });

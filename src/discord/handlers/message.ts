@@ -1,0 +1,31 @@
+/*
+    VoiceJP Discord Bot Handler: Message Create Event
+*/
+
+import { Client, Message } from "discord.js";
+
+import { createAudioResource } from "@discordjs/voice";
+
+import synthesizeSpeech from "../../utils/speech.ts";
+
+import type { OmitPartialGroupDMChannel } from "discord.js";
+import type { SynthesisChannels } from "../../types/index.d.ts";
+
+export async function handleMessageCreateEvent(client: Client, message: OmitPartialGroupDMChannel<Message>, synthesisChannels: SynthesisChannels) {
+    if (message.author.bot) return;
+
+    Array.from(synthesisChannels.values()).forEach(channel => {
+        if (channel.textChannelId === message.channelId) {
+            channel.player.stop();
+
+            const username = message.member ? message.member.displayName : message.author.username;
+            const shortUsername = username.length > 5 ? username.slice(0, 5) : username;
+            const shortContent = message.content.length > 200 ? message.content.slice(0, 200) : message.content;
+
+            synthesizeSpeech(`${shortUsername}、${shortContent}`).then(path => {
+                const resource = createAudioResource(path);
+                channel.player.play(resource);
+            });
+        }
+    });
+}

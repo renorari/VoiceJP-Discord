@@ -39,5 +39,19 @@ export const commands = [
         ),
     new SlashCommandBuilder()
         .setName("leave")
-        .setDescription("Botをボイスチャンネルから退出させます。")
+        .setDescription("Botをボイスチャンネルから退出させます。"),
+    // Speech Commands
+    new SlashCommandBuilder()
+        .setName("speech")
+        .setDescription("声に関するコマンドです。")
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName("synthesis")
+                .setDescription("メッセージを音声合成で再生します。")
+        )
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName("recognition")
+                .setDescription("音声認識を開始します。")
+        )
 ];

@@ -4,7 +4,7 @@
 
 import { Client, Colors, CommandInteraction, EmbedBuilder } from "discord.js";
 
-import type { Connections } from "../../types/index.d.ts";
+import type { Connections } from "../../../types/index.d.ts";
 
 export default async function handlePingCommand(client: Client, interaction: CommandInteraction, connections: Connections) {
     await interaction.reply({
