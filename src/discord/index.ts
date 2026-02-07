@@ -43,11 +43,11 @@ client.on(Events.InteractionCreate, async interaction => {
 
     switch (interaction.commandName) {
         case "ping":
-            await handlePingCommand(client, interaction, connections);
+            await handlePingCommand(client, interaction, connections, synthesisChannels, recognitionChannels);
             break;
 
         case "join":
-            await handleJoinCommand(client, interaction, connections);
+            await handleJoinCommand(client, interaction, connections, synthesisChannels, recognitionChannels);
             break;
 
         case "leave":

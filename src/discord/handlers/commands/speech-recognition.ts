@@ -110,6 +110,7 @@ export default async function handleSpeechRecognitionCommand(client: Client, int
                 "behavior": EndBehaviorType.Manual
             }
         });
+        opusStream.on("error", logger.error);
         const decoder = new prism.opus.Decoder({
             "rate": 48000,
             "channels": 1,

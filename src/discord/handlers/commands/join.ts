@@ -6,9 +6,9 @@ import { ChannelType, ChatInputCommandInteraction, Client, MessageFlags } from "
 
 import { entersState, joinVoiceChannel, VoiceConnectionStatus } from "@discordjs/voice";
 
-import type { Connections } from "../../../types/index.d.ts";
+import type { Connections, RecognitionChannels, SynthesisChannels } from "../../../types/index.d.ts";
 
-export async function handleJoinCommand(client: Client, interaction: ChatInputCommandInteraction, connections: Connections) {
+export async function handleJoinCommand(client: Client, interaction: ChatInputCommandInteraction, connections: Connections, synthesisChannels: SynthesisChannels, recognitionChannels: RecognitionChannels) {
     if (!interaction.guildId || !interaction.guild) {
         await interaction.reply({
             "content": "このコマンドはサーバー内でのみ使用できます。",
@@ -56,6 +56,8 @@ export async function handleJoinCommand(client: Client, interaction: ChatInputCo
         } catch {
             connection.destroy();
             connections.delete(interaction.guildId!);
+            synthesisChannels.delete(interaction.guildId!);
+            recognitionChannels.delete(interaction.guildId!);
             await interaction.followUp({
                 "content": "ボイスチャンネルから切断されました。"
             });

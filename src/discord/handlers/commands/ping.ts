@@ -4,9 +4,9 @@
 
 import { Client, Colors, CommandInteraction, EmbedBuilder } from "discord.js";
 
-import type { Connections } from "../../../types/index.d.ts";
+import type { Connections, RecognitionChannels, SynthesisChannels } from "../../../types/index.d.ts";
 
-export default async function handlePingCommand(client: Client, interaction: CommandInteraction, connections: Connections) {
+export default async function handlePingCommand(client: Client, interaction: CommandInteraction, connections: Connections, synthesisChannels: SynthesisChannels, recognitionChannels: RecognitionChannels) {
     await interaction.reply({
         "content": "ポン！",
         "embeds": [
@@ -34,6 +34,16 @@ export default async function handlePingCommand(client: Client, interaction: Com
                 .addFields({
                     "name": "参加中のボイスチャンネル数",
                     "value": `${connections.size} チャンネル`,
+                    "inline": true
+                })
+                .addFields({
+                    "name": "メッセージ読み上げ中のチャンネル数",
+                    "value": `${synthesisChannels.size} チャンネル`,
+                    "inline": true
+                })
+                .addFields({
+                    "name": "音声認識中のチャンネル数・ユーザー数",
+                    "value": `${recognitionChannels.size} チャンネル\n${Array.from(recognitionChannels.values()).reduce((acc, curr) => acc + curr.members.size, 0)} ユーザー`,
                     "inline": true
                 })
                 .setColor(Colors.DarkBlue)
