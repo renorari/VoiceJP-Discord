@@ -4,7 +4,7 @@
 
 import "dotenv/config";
 
-import { Client, Events, MessageFlags } from "discord.js";
+import { Client, Events } from "discord.js";
 
 import log from "../utils/logger.ts";
 import { clientOptions, commands } from "./constants/index.ts";
@@ -15,6 +15,7 @@ import handleSpeechSynthesisCommand from "./handlers/commands/speech-synthesis.t
 import handleUndefinedCommand from "./handlers/commands/undefined-command.ts";
 import { handleMessageCreateEvent } from "./handlers/message.ts";
 import setActivity from "./utils/activity.ts";
+import nrCheck from "./utils/block-user.ts";
 
 import type { Connections, RecognitionChannels, SynthesisChannels } from "../types/index.d.ts";
 const client = new Client(clientOptions);
@@ -33,6 +34,7 @@ client.on(Events.ClientReady, readyClient => {
 });
 
 client.on(Events.InteractionCreate, async interaction => {
+    if (nrCheck(interaction.user.id) || nrCheck(interaction.guildId || "")) return;
     if (!interaction.isChatInputCommand()) return;
 
     switch (interaction.commandName) {
@@ -70,6 +72,7 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 client.on(Events.MessageCreate, async message => {
+    if (nrCheck(message.author.id) || nrCheck(message.guildId || "")) return;
     await handleMessageCreateEvent(client, message, synthesisChannels);
 });
 
