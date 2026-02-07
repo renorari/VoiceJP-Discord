@@ -18,9 +18,9 @@ export default async function handleSpeechSynthesisCommand(client: Client, inter
     }
 
     if (synthesisChannels.has(interaction.guildId)) {
+        synthesisChannels.delete(interaction.guildId);
         await interaction.reply({
-            "content": "既に音声合成が設定されています。",
-            "flags": [MessageFlags.Ephemeral]
+            "content": "このサーバーのメッセージ読み上げを無効にしました。"
         });
         return;
     }

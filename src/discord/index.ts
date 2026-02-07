@@ -11,6 +11,7 @@ import { clientOptions, commands } from "./constants/index.ts";
 import { handleJoinCommand } from "./handlers/commands/join.ts";
 import { handleLeaveCommand } from "./handlers/commands/leave.ts";
 import handlePingCommand from "./handlers/commands/ping.ts";
+import handleSpeechRecognitionCommand from "./handlers/commands/speech-recognition.ts";
 import handleSpeechSynthesisCommand from "./handlers/commands/speech-synthesis.ts";
 import handleUndefinedCommand from "./handlers/commands/undefined-command.ts";
 import { handleMessageCreateEvent } from "./handlers/message.ts";
@@ -18,8 +19,10 @@ import setActivity from "./utils/activity.ts";
 import nrCheck from "./utils/block-user.ts";
 
 import type { Connections, RecognitionChannels, SynthesisChannels } from "../types/index.d.ts";
+
 const client = new Client(clientOptions);
 const logger = log.getLogger("discord");
+
 const connections: Connections = new Map();
 const synthesisChannels: SynthesisChannels = new Map();
 const recognitionChannels: RecognitionChannels = new Map();
@@ -47,7 +50,7 @@ client.on(Events.InteractionCreate, async interaction => {
             break;
 
         case "leave":
-            await handleLeaveCommand(client, interaction, connections);
+            await handleLeaveCommand(client, interaction, connections, synthesisChannels, recognitionChannels);
             break;
 
         case "speech": {
@@ -58,11 +61,13 @@ client.on(Events.InteractionCreate, async interaction => {
                     await handleSpeechSynthesisCommand(client, interaction, connections, synthesisChannels);
                     break;
 
-                case "recognition": {
+                case "recognition":
+                    await handleSpeechRecognitionCommand(client, interaction, connections, recognitionChannels);
                     break;
-                }
-
-                default: await handleUndefinedCommand(client, interaction);
+                    
+                default:
+                    await handleUndefinedCommand(client, interaction);
+                    break;
             }
             break;
         }

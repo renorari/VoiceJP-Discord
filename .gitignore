@@ -219,3 +219,6 @@ $RECYCLE.BIN/
 
 # VoiceJP HTS Voice files
 voices/*.htsvoice
+
+# VoiceJP Vosk Model files
+vosk-model/*

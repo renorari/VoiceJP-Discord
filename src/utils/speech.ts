@@ -24,7 +24,7 @@ fs.access(dictionaryPath).catch(() => {
     logger.warn(`Open JTalk dictionary not found at path: ${dictionaryPath}. Please set OPEN_JTALK_DICTIONARY_PATH environment variable if necessary.`);
 });
 
-const modelPath = process.env.OPEN_JTALK_VOICE_MODEL_PATH || path.join("voices", "default.htsvoice");
+const modelPath = process.env.OPEN_JTALK_VOICE_MODEL_PATH || path.join(process.cwd(), "voices", "default.htsvoice");
 fs.access(modelPath).catch(() => {
     logger.warn(`Open JTalk voice model not found at path: ${modelPath}. Please set OPEN_JTALK_VOICE_MODEL_PATH environment variable if necessary.`);
 });
