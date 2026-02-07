@@ -4,7 +4,7 @@
 
 import { ChatInputCommandInteraction, Client, MessageFlags } from "discord.js";
 
-import { Connections } from "../../types";
+import type { Connections } from "../../types/index.d.ts";
 
 export async function handleLeaveCommand(client: Client, interaction: ChatInputCommandInteraction, connections: Connections) {
     if (!interaction.guildId) {

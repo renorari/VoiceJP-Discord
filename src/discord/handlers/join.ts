@@ -6,7 +6,7 @@ import { ChannelType, ChatInputCommandInteraction, Client, MessageFlags } from "
 
 import { entersState, joinVoiceChannel, VoiceConnectionStatus } from "@discordjs/voice";
 
-import { Connections } from "../../types";
+import type { Connections } from "../../types/index.d.ts";
 
 export async function handleJoinCommand(client: Client, interaction: ChatInputCommandInteraction, connections: Connections) {
     if (!interaction.guildId || !interaction.guild) {

@@ -4,16 +4,17 @@
 
 import "dotenv/config";
 
-import { Client, Events, MessageFlags } from "discord.js";
+import { Client, Events } from "discord.js";
 
 import log from "../utils/logger.ts";
 import { clientOptions, commands } from "./constants/index.ts";
+import { handleJoinCommand } from "./handlers/join.ts";
+import { handleLeaveCommand } from "./handlers/leave.ts";
 import handlePingCommand from "./handlers/ping.ts";
 import handleUndefinedCommand from "./handlers/undefined-command.ts";
 import setActivity from "./utils/activity.ts";
-import { handleJoinCommand } from "./handlers/join.ts";
-import { Connections } from "../types/index";
-import { handleLeaveCommand } from "./handlers/leave.ts";
+
+import type { Connections } from "../types/index.d.ts";
 
 const client = new Client(clientOptions);
 const logger = log.getLogger("discord");
