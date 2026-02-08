@@ -9,6 +9,7 @@ import { Client, Events } from "discord.js";
 import i18n from "../i18n.ts";
 import log from "../utils/logger.ts";
 import { clientOptions, commands } from "./constants/index.ts";
+import handleHelpCommand from "./handlers/commands/help.ts";
 import { handleJoinCommand } from "./handlers/commands/join.ts";
 import { handleLeaveCommand } from "./handlers/commands/leave.ts";
 import handlePingCommand from "./handlers/commands/ping.ts";
@@ -49,6 +50,10 @@ client.on(Events.InteractionCreate, async interaction => {
             await handlePingCommand(client, interaction, connections, synthesisChannels, recognitionChannels);
             break;
 
+        case "help":
+            await handleHelpCommand(client, interaction);
+            break;
+
         case "join":
             await handleJoinCommand(client, interaction, connections, synthesisChannels, recognitionChannels);
             break;
@@ -68,11 +73,12 @@ client.on(Events.InteractionCreate, async interaction => {
                 case "recognition":
                     await handleSpeechRecognitionCommand(client, interaction, connections, recognitionChannels);
                     break;
-                    
+
                 default:
                     await handleUndefinedCommand(client, interaction);
                     break;
             }
+
             break;
         }
 

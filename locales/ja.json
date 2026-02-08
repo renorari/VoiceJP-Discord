@@ -28,15 +28,24 @@
             "status": "/help | %sサーバー | %sチャンネル参加中 | %sms"
         },
         "commands": {
-            "helpDescription": "利用可能なコマンドの一覧を表示します。",
-            "joinChannelDescription": "Botを参加させるボイスチャンネルを選択します。",
+            "helpDescription": "Botの使い方を表示します。",
+            "joinChannelDescription": "ボイスチャンネルを指定してBotを参加させます。",
             "joinDescription": "Botをボイスチャンネルに参加させます。",
             "leaveDescription": "Botをボイスチャンネルから退出させます。",
             "pingDescription": "Botの現在情報を表示します。",
-            "speechDescription": "声に関するコマンドです。",
-            "speechRecognitionDescription": "音声認識を開始します。",
-            "speechSynthesisDescription": "メッセージを音声合成で再生します。",
+            "speechDescription": "音声認識と音声合成の設定を行います。",
+            "speechRecognitionDescription": "ボイスチャンネル内の音声を文字起こしします。",
+            "speechSynthesisDescription": "メッセージの読み上げを行います。",
             "unknown": "不明なコマンドです。\nDiscordの再起動をお試しください。"
+        },
+        "help": {
+            "description": "VoiceJPをお使いいただきありがとうございます。\n\nVoiceJPでは、音声チャンネルにボットを参加させることで、メッセージの読み上げや文字起こしを行うことができます。",
+            "join": "%s を実行するとボイスチャンネルにBotを参加させることができます。\n参加させた後、メッセージの読み上げや文字起こしが可能になります。",
+            "leave": "%s を実行するとボイスチャンネルからBotを退出させることができます。\n退出させると、メッセージの読み上げや文字起こしは停止されます。",
+            "ping": "%s を実行するとBotの現在情報を確認できます。\nBotの稼働状況や参加中のサーバー数、チャンネル数などが表示されます。",
+            "speechRecognition": "%s を実行すると、Botが参加しているボイスチャンネル内の音声を文字起こしします。\n認識されたテキストは、同じサーバー内のテキストチャンネルに送信されます。",
+            "speechSynthesis": "%s を実行すると、チャンネルに送られてくるメッセージを音声合成で再生します。\nメッセージはBotが参加しているボイスチャンネル内で読み上げられます。",
+            "title": "VoiceJPの使い方"
         },
         "join": {
             "disconnected": "ボイスチャンネルから切断されました。",
