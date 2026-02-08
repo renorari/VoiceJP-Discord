@@ -36,7 +36,7 @@ client.on(Events.ClientReady, readyClient => {
     logger.info(i18n.__("internal.discord.loggedInAs", readyClient.user.tag));
 
     setActivity(readyClient, connections);
-    setInterval(() => setActivity(readyClient, connections), 10 * 60 * 1000);
+    setInterval(() => setActivity(readyClient, connections), 60 * 1000);
 
     readyClient.application.commands.set(commands);
 });
