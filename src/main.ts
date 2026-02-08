@@ -15,12 +15,15 @@ import accessLogMiddleware from "./utils/middlewares/log.ts";
 
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 const server = express();
 const logger = log.getLogger();
 
-server.use(helmet());
-server.use(cors());
+if (IS_PRODUCTION) {
+    server.use(helmet());
+    server.use(cors());
+}
 server.use(accessLogMiddleware(log.getLogger("access")));
 server.use(express.json());
 server.use(express.urlencoded({ "extended": true }));
