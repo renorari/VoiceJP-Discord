@@ -13,7 +13,6 @@ export const clientOptions: ClientOptions = {
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.GuildPresences,
         GatewayIntentBits.GuildVoiceStates,
         GatewayIntentBits.GuildWebhooks,
         GatewayIntentBits.MessageContent
