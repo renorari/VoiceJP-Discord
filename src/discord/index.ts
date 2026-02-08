@@ -21,9 +21,11 @@ import handleUndefinedCommand from "./handlers/commands/undefined-command.ts";
 import { handleMessageCreateEvent } from "./handlers/message.ts";
 import { handleVoiceStateUpdate } from "./handlers/voice-state-update.ts";
 import setActivity from "./utils/activity.ts";
+import sendAdMessage from "./utils/ad.ts";
 import nrCheck from "./utils/block-user.ts";
 import RecognitionChannelMap from "./utils/recognition.ts";
 
+import type { GuildTextBasedChannel } from "discord.js";
 import type { Connections, RecognitionChannels, SynthesisChannels } from "../types/index.d.ts";
 
 const client = new Client(clientOptions);
@@ -45,6 +47,8 @@ client.on(Events.ClientReady, readyClient => {
 client.on(Events.InteractionCreate, async interaction => {
     if (nrCheck(interaction.user.id) || nrCheck(interaction.guildId || "")) return;
     if (!interaction.isChatInputCommand()) return;
+
+    if (Math.random() < 0.5) sendAdMessage(interaction.channel as GuildTextBasedChannel).catch(() => {});
 
     switch (interaction.commandName) {
         case "ping":

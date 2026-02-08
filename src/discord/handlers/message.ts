@@ -8,8 +8,9 @@ import { createAudioResource } from "@discordjs/voice";
 
 import i18n from "../../i18n.ts";
 import synthesizeSpeech from "../../utils/speech.ts";
+import sendAdMessage from "../utils/ad.ts";
 
-import type { OmitPartialGroupDMChannel } from "discord.js";
+import type { GuildTextBasedChannel, OmitPartialGroupDMChannel } from "discord.js";
 import type { SynthesisChannels } from "../../types/index.d.ts";
 
 export async function handleMessageCreateEvent(client: Client, message: OmitPartialGroupDMChannel<Message>, synthesisChannels: SynthesisChannels) {
@@ -27,6 +28,8 @@ export async function handleMessageCreateEvent(client: Client, message: OmitPart
                 const resource = createAudioResource(path);
                 channel.player.play(resource);
             });
+
+            if (Math.random() < 0.1) sendAdMessage(message.channel as GuildTextBasedChannel).catch(() => {});
         }
     });
 }
