@@ -75,10 +75,24 @@ const ads: (string | MessagePayload | MessageCreateOptions)[] = [
 
 export default async function sendAdMessage(channel: GuildTextBasedChannel) {
     if (process.env.ENABLE_ADS !== "true") return;
+
     if (ads.length === 0) return;
     const ad = ads[Math.floor(Math.random() * ads.length)];
-    const message = await channel.send(ad);
-    setInterval(async () => {
-        message.delete().catch(() => {});
-    }, 5 * 60 * 1000);
+
+    if (!("createWebhook" in channel)) {
+        const message = await channel.send(ad);
+        setTimeout(() => {
+            message.delete().catch();
+        }, 10 * 60 * 1000);
+        return;
+    };
+
+    const webhook = await channel.createWebhook({
+        "name": "広告"
+    });
+    const message = await webhook.send(ad);
+    await webhook.delete();
+    setTimeout(() => {
+        message.delete().catch();
+    }, 10 * 60 * 1000);
 }
