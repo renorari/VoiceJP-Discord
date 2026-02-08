@@ -48,7 +48,7 @@ client.on(Events.InteractionCreate, async interaction => {
     if (nrCheck(interaction.user.id) || nrCheck(interaction.guildId || "")) return;
     if (!interaction.isChatInputCommand()) return;
 
-    if (Math.random() < 0.5) sendAdMessage(interaction.channel as GuildTextBasedChannel).catch(() => {});
+    if (Math.random() < 0.2) sendAdMessage(interaction.channel as GuildTextBasedChannel).catch(() => {});
 
     switch (interaction.commandName) {
         case "ping":
