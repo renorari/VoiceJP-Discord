@@ -10,18 +10,18 @@ import type { GuildTextBasedChannel, MessageCreateOptions, MessagePayload } from
 
 const ads: (string | MessagePayload | MessageCreateOptions)[] = [
     {
-        "content": "VoiceJPをお使いの皆さんにお知らせです",
+        "content": "VoiceJPをお使いの皆さまにお知らせです",
         "embeds": [
             new EmbedBuilder()
-                .setTitle("VoiceJPの運営には皆様のご支援が必要です")
+                .setTitle("💬 VoiceJPの運営には皆さまのご支援が必要です")
                 .setDescription("いつもVoiceJPをご利用いただきありがとうございます。\nVoiceJPは、AIを活用した音声合成・認識サービスを無料で提供しておりますが、その運営には多大なコストがかかっております。\n皆様のご支援があって初めて、より良いサービスを提供し続けることが可能となります。ぜひ、以下のリンクからご支援をお願いいたします。")
                 .addFields(
                     {
-                        "name": "Campfireからのご支援(審査中)",
+                        "name": "🔥 Campfireからのご支援(審査中)",
                         "value": "クラウドファンディングプラットフォーム「Campfire」を通じて、VoiceJPの運営を支援していただけます。詳細は以下のリンクをご覧ください。\n[Campfire VoiceJP支援ページ](https://camp-fire.jp/projects/927913/view)"
                     },
                     {
-                        "name": "PayPalからのご支援",
+                        "name": "🧾 PayPalからのご支援",
                         "value": "PayPalを利用して、VoiceJPの運営を直接支援していただけます。以下のリンクからご支援方法をご確認ください。\n[PayPal VoiceJP運営者宛](https://www.paypal.com/paypalme/renorari)"
                     }
                 )
