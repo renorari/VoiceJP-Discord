@@ -1,0 +1,87 @@
+{
+    "internal": {
+        "blocklist": {
+            "invalidUpdateInterval": "Invalid BLOCKLIST_UPDATE_INTERVAL_MS: %s. Using default."
+        },
+        "discord": {
+            "loggedInAs": "Logged in as %s"
+        },
+        "server": {
+            "listening": "Listening on %s"
+        },
+        "speech": {
+            "dictionaryMissing": "Open JTalk dictionary not found at path: %s. Please set OPEN_JTALK_DICTIONARY_PATH environment variable if necessary.",
+            "openJTalkExitCode": "Open JTalk process exited with code %s",
+            "openJTalkStartFailed": "Failed to start Open JTalk process: %s",
+            "voiceModelMissing": "Open JTalk voice model not found at path: %s. Please set OPEN_JTALK_VOICE_MODEL_PATH environment variable if necessary."
+        },
+        "speechRecognition": {
+            "voskModelMissing": "Vosk model not found at path: %s. Please set VOSK_MODEL_PATH environment variable if necessary.",
+            "webhookCreateFailed": "Failed to create webhook in channel %s: %s"
+        }
+    },
+    "public": {
+        "server": {
+            "notFound": "Not Found"
+        },
+        "activity": {
+            "status": "/help | %sサーバー | %sチャンネル参加中 | %sms"
+        },
+        "commands": {
+            "helpDescription": "利用可能なコマンドの一覧を表示します。",
+            "joinChannelDescription": "Botを参加させるボイスチャンネルを選択します。",
+            "joinDescription": "Botをボイスチャンネルに参加させます。",
+            "leaveDescription": "Botをボイスチャンネルから退出させます。",
+            "pingDescription": "Botの現在情報を表示します。",
+            "speechDescription": "声に関するコマンドです。",
+            "speechRecognitionDescription": "音声認識を開始します。",
+            "speechSynthesisDescription": "メッセージを音声合成で再生します。",
+            "unknown": "不明なコマンドです。\nDiscordの再起動をお試しください。"
+        },
+        "join": {
+            "disconnected": "ボイスチャンネルから切断されました。",
+            "guildOnly": "このコマンドはサーバー内でのみ使用できます。",
+            "joined": "ボイスチャンネル %s に参加しました。",
+            "voiceChannelRequired": "音声チャンネルを指定してください。"
+        },
+        "leave": {
+            "guildOnly": "このコマンドはサーバー内でのみ使用できます。",
+            "left": "ボイスチャンネルから退出しました。",
+            "notInVoice": "Botは現在どのボイスチャンネルにも参加していません。"
+        },
+        "ping": {
+            "apiLatency": "API遅延",
+            "channelCountValue": "%s チャンネル",
+            "guildCount": "参加中のサーバー数",
+            "guildCountValue": "%s サーバー",
+            "pong": "ポン！",
+            "recognitionCounts": "音声認識中のチャンネル数・ユーザー数",
+            "recognitionCountValue": "%s チャンネル\n%s ユーザー",
+            "statusTitle": "ステータス",
+            "synthesisChannelCount": "メッセージ読み上げ中のチャンネル数",
+            "uptime": "Botの稼働時間",
+            "voiceChannelCount": "参加中のボイスチャンネル数",
+            "websocketLatency": "WebSocket遅延"
+        },
+        "speechRecognition": {
+            "activeMembers": "参加中のメンバー",
+            "disabled": "このサーバーの音声認識を無効にしました。",
+            "enabled": "音声認識を有効にしました。",
+            "guildOnly": "このコマンドはサーバー内でのみ使用できます。",
+            "memberLimit": "音声認識は最大10人まで対応しています。ボイスチャンネルの参加者を減らしてから再度実行してください。",
+            "memberStartFailed": "%s さんの音声認識の開始に失敗しました。",
+            "noVoiceChannel": "Botが参加しているボイスチャンネルがありません。先に %s コマンドでボイスチャンネルに参加させてください。",
+            "textChannelOnly": "このコマンドはテキストチャンネルで実行してください。",
+            "webhookDeleteReason": "不要なVoiceJPのWebhookを削除",
+            "webhookLimit": "テキストチャンネルのWebhookが上限に達しているため、音声認識を開始できません。不要なWebhookを削除してから再度実行してください。",
+            "webhookReason": "VoiceJPの音声認識用"
+        },
+        "speechSynthesis": {
+            "disabled": "このサーバーのメッセージ読み上げを無効にしました。",
+            "enabled": "音声合成を有効にしました。",
+            "guildOnly": "このコマンドはサーバー内でのみ使用できます。",
+            "noVoiceChannel": "Botが参加しているボイスチャンネルがありません。先に %s コマンドでボイスチャンネルに参加させてください。",
+            "readMessage": "%s、%s"
+        }
+    }
+}

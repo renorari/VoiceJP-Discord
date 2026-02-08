@@ -7,6 +7,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
+import i18n from "../i18n.ts";
 import log from "./logger.ts";
 
 const logger = log.getLogger();
@@ -21,12 +22,12 @@ const dictionaries: Record<string, string> = {
 
 const dictionaryPath = process.env.OPEN_JTALK_DICTIONARY_PATH || dictionaries[process.platform] || "";
 fs.access(dictionaryPath).catch(() => {
-    logger.warn(`Open JTalk dictionary not found at path: ${dictionaryPath}. Please set OPEN_JTALK_DICTIONARY_PATH environment variable if necessary.`);
+    logger.warn(i18n.__("internal.speech.dictionaryMissing", dictionaryPath));
 });
 
 const modelPath = process.env.OPEN_JTALK_VOICE_MODEL_PATH || path.join(process.cwd(), "voices", "default.htsvoice");
 fs.access(modelPath).catch(() => {
-    logger.warn(`Open JTalk voice model not found at path: ${modelPath}. Please set OPEN_JTALK_VOICE_MODEL_PATH environment variable if necessary.`);
+    logger.warn(i18n.__("internal.speech.voiceModelMissing", modelPath));
 });
 
 export default function synthesizeSpeech(text: string) {
@@ -45,12 +46,12 @@ export default function synthesizeSpeech(text: string) {
 
     return new Promise<string>((resolve, reject) => {
         openJTalk.on("error", err => {
-            reject(new Error(`Failed to start Open JTalk process: ${err.message}`));
+            reject(new Error(i18n.__("internal.speech.openJTalkStartFailed", err.message)));
         });
 
         openJTalk.on("close", code => {
             if (code !== 0) {
-                reject(new Error(`Open JTalk process exited with code ${code}`));
+                reject(new Error(i18n.__("internal.speech.openJTalkExitCode", code ? code.toString() : "null")));
             } else {
                 resolve(tempWavPath);
             }

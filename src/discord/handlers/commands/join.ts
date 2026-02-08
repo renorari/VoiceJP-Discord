@@ -6,12 +6,14 @@ import { ChannelType, ChatInputCommandInteraction, Client, MessageFlags } from "
 
 import { entersState, joinVoiceChannel, VoiceConnectionStatus } from "@discordjs/voice";
 
+import i18n from "../../../i18n.ts";
+
 import type { Connections, RecognitionChannels, SynthesisChannels } from "../../../types/index.d.ts";
 
 export async function handleJoinCommand(client: Client, interaction: ChatInputCommandInteraction, connections: Connections, synthesisChannels: SynthesisChannels, recognitionChannels: RecognitionChannels) {
     if (!interaction.guildId || !interaction.guild) {
         await interaction.reply({
-            "content": "このコマンドはサーバー内でのみ使用できます。",
+            "content": i18n.__("public.join.guildOnly"),
             "flags": [MessageFlags.Ephemeral]
         });
         return;
@@ -20,7 +22,7 @@ export async function handleJoinCommand(client: Client, interaction: ChatInputCo
     const channel = interaction.options.getChannel("channel", true);
     if (!channel || ![ChannelType.GuildVoice, ChannelType.GuildStageVoice].includes(channel.type)) {
         await interaction.reply({
-            "content": "音声チャンネルを指定してください。",
+            "content": i18n.__("public.join.voiceChannelRequired"),
             "flags": [MessageFlags.Ephemeral]
         });
         return;
@@ -43,7 +45,7 @@ export async function handleJoinCommand(client: Client, interaction: ChatInputCo
             "connection": connection
         });
         await interaction.editReply({
-            "content": `ボイスチャンネル <#${channel.id}> に参加しました。`
+            "content": i18n.__("public.join.joined", `<#${channel.id}>`)
         });
     });
 
@@ -59,7 +61,7 @@ export async function handleJoinCommand(client: Client, interaction: ChatInputCo
             synthesisChannels.delete(interaction.guildId!);
             recognitionChannels.delete(interaction.guildId!);
             await interaction.followUp({
-                "content": "ボイスチャンネルから切断されました。"
+                "content": i18n.__("public.join.disconnected")
             });
         }
     });

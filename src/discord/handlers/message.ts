@@ -6,6 +6,7 @@ import { Client, Message } from "discord.js";
 
 import { createAudioResource } from "@discordjs/voice";
 
+import i18n from "../../i18n.ts";
 import synthesizeSpeech from "../../utils/speech.ts";
 
 import type { OmitPartialGroupDMChannel } from "discord.js";
@@ -22,7 +23,7 @@ export async function handleMessageCreateEvent(client: Client, message: OmitPart
             const shortUsername = username.length > 5 ? username.slice(0, 5) : username;
             const shortContent = message.content.length > 200 ? message.content.slice(0, 200) : message.content;
 
-            synthesizeSpeech(`${shortUsername}、${shortContent}`).then(path => {
+            synthesizeSpeech(i18n.__("public.speechSynthesis.readMessage", shortUsername, shortContent)).then(path => {
                 const resource = createAudioResource(path);
                 channel.player.play(resource);
             });

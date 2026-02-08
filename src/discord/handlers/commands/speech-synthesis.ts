@@ -6,12 +6,14 @@ import { ChatInputCommandInteraction, Client, MessageFlags } from "discord.js";
 
 import { createAudioPlayer } from "@discordjs/voice";
 
+import i18n from "../../../i18n.ts";
+
 import type { Connections, SynthesisChannels } from "../../../types/index.d.ts";
 
 export default async function handleSpeechSynthesisCommand(client: Client, interaction: ChatInputCommandInteraction, connections: Connections, synthesisChannels: SynthesisChannels) {
     if (!interaction.guildId || !interaction.guild) {
         await interaction.reply({
-            "content": "このコマンドはサーバー内でのみ使用できます。",
+            "content": i18n.__("public.speechSynthesis.guildOnly"),
             "flags": [MessageFlags.Ephemeral]
         });
         return;
@@ -20,14 +22,17 @@ export default async function handleSpeechSynthesisCommand(client: Client, inter
     if (synthesisChannels.has(interaction.guildId)) {
         synthesisChannels.delete(interaction.guildId);
         await interaction.reply({
-            "content": "このサーバーのメッセージ読み上げを無効にしました。"
+            "content": i18n.__("public.speechSynthesis.disabled")
         });
         return;
     }
 
     if (!connections.has(interaction.guildId)) {
         await interaction.reply({
-            "content": `Botが参加しているボイスチャンネルがありません。先に </join:${client.application?.commands.cache.find(cmd => cmd.name === "join")?.id}> コマンドでボイスチャンネルに参加させてください。`,
+            "content": i18n.__(
+                "public.speechSynthesis.noVoiceChannel",
+                `</join:${client.application?.commands.cache.find(cmd => cmd.name === "join")?.id}>`
+            ),
             "flags": [MessageFlags.Ephemeral]
         });
         return;
@@ -47,6 +52,6 @@ export default async function handleSpeechSynthesisCommand(client: Client, inter
     });
 
     await interaction.reply({
-        "content": "音声合成を有効にしました。"
+        "content": i18n.__("public.speechSynthesis.enabled")
     });
 }

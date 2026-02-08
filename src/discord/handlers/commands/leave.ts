@@ -4,12 +4,14 @@
 
 import { ChatInputCommandInteraction, Client, MessageFlags } from "discord.js";
 
+import i18n from "../../../i18n.ts";
+
 import type { Connections, RecognitionChannels, SynthesisChannels } from "../../../types/index.d.ts";
 
 export async function handleLeaveCommand(client: Client, interaction: ChatInputCommandInteraction, connections: Connections, synthesisChannels: SynthesisChannels, recognitionChannels: RecognitionChannels) {
     if (!interaction.guildId || !interaction.guild) {
         await interaction.reply({
-            "content": "このコマンドはサーバー内でのみ使用できます。",
+            "content": i18n.__("public.leave.guildOnly"),
             "flags": [MessageFlags.Ephemeral]
         });
         return;
@@ -22,12 +24,12 @@ export async function handleLeaveCommand(client: Client, interaction: ChatInputC
         synthesisChannels.delete(interaction.guildId);
         recognitionChannels.delete(interaction.guildId);
         await interaction.reply({
-            "content": "ボイスチャンネルから退出しました。",
+            "content": i18n.__("public.leave.left"),
             "flags": [MessageFlags.Ephemeral]
         });
     } else {
         await interaction.reply({
-            "content": "Botは現在どのボイスチャンネルにも参加していません。",
+            "content": i18n.__("public.leave.notInVoice"),
             "flags": [MessageFlags.Ephemeral]
         });
     }

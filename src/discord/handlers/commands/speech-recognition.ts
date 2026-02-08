@@ -11,20 +11,23 @@ import path from "node:path";
 import * as prism from "prism-media";
 import * as vosk from "vosk";
 
-import { EndBehaviorType, entersState, VoiceConnection, VoiceConnectionStatus } from "@discordjs/voice";
+import {
+    EndBehaviorType, entersState, VoiceConnection, VoiceConnectionStatus
+} from "@discordjs/voice";
 
+import i18n from "../../../i18n.ts";
 import log from "../../../utils/logger.ts";
 import FillSilenceStream from "../../utils/fill-silence.ts";
+import { MemberRecognitionDataMap } from "../../utils/recognition.ts";
 
 import type { VoiceBasedChannel, VoiceState } from "discord.js";
 import type { Connections, RecognitionChannels } from "../../../types/index.d.ts";
-import { MemberRecognitionDataMap } from "../../utils/recognition.ts";
 
 const logger = log.getLogger();
 
 const voskModelPath = process.env.VOSK_MODEL_PATH || path.join(process.cwd(), "vosk-model");
 fs.stat(voskModelPath).catch(() => {
-    logger.warn(`Vosk model not found at path: ${voskModelPath}. Please set VOSK_MODEL_PATH environment variable if necessary.`);
+    logger.warn(i18n.__("internal.speechRecognition.voskModelMissing", voskModelPath));
 });
 const voskModel = new vosk.Model(voskModelPath);
 
@@ -35,10 +38,10 @@ async function addMember(member: GuildMember, members: MemberRecognitionDataMap,
         "avatar": member.user.displayAvatarURL({
             "extension": "png"
         }),
-        "reason": "VoiceJPの音声認識用"
+        "reason": i18n.__("public.speechRecognition.webhookReason")
     }).catch((error) => {
         logger.error(error);
-        throw new Error("Webhookの作成に失敗しました。");
+        throw new Error(i18n.__("internal.speechRecognition.webhookCreateFailed", channel.id, error instanceof Error ? error.message : String(error)));
     });
 
     const opusStream = connection.receiver.subscribe(member.id, {
@@ -84,10 +87,10 @@ async function addMember(member: GuildMember, members: MemberRecognitionDataMap,
 
 async function replyMessage(interaction: ChatInputCommandInteraction, members: MemberRecognitionDataMap) {
     interaction.editReply({
-        "content": "音声認識を有効にしました。",
+        "content": i18n.__("public.speechRecognition.enabled"),
         "embeds": [
             new EmbedBuilder()
-                .setTitle("参加中のメンバー")
+                .setTitle(i18n.__("public.speechRecognition.activeMembers"))
                 .setDescription(Array.from(members.values()).map(m => `- <@${m.member.id}>`).join("\n"))
                 .setColor(Colors.DarkBlue)
         ]
@@ -95,7 +98,7 @@ async function replyMessage(interaction: ChatInputCommandInteraction, members: M
         interaction.followUp({
             "embeds": [
                 new EmbedBuilder()
-                    .setTitle("参加中のメンバー")
+                    .setTitle(i18n.__("public.speechRecognition.activeMembers"))
                     .setDescription(Array.from(members.values()).map(m => `- <@${m.member.id}>`).join("\n"))
                     .setColor(Colors.DarkBlue)
             ]
@@ -106,7 +109,7 @@ async function replyMessage(interaction: ChatInputCommandInteraction, members: M
 export default async function handleSpeechRecognitionCommand(client: Client, interaction: ChatInputCommandInteraction, connections: Connections, recognitionChannels: RecognitionChannels) {
     if (!interaction.guildId || !interaction.guild) {
         await interaction.reply({
-            "content": "このコマンドはサーバー内でのみ使用できます。",
+            "content": i18n.__("public.speechRecognition.guildOnly"),
             "flags": [MessageFlags.Ephemeral]
         });
         return;
@@ -115,14 +118,17 @@ export default async function handleSpeechRecognitionCommand(client: Client, int
     if (recognitionChannels.has(interaction.guildId)) {
         recognitionChannels.delete(interaction.guildId);
         await interaction.reply({
-            "content": "このサーバーの音声認識を無効にしました。"
+            "content": i18n.__("public.speechRecognition.disabled")
         });
         return;
     }
 
     if (!connections.has(interaction.guildId)) {
         await interaction.reply({
-            "content": `Botが参加しているボイスチャンネルがありません。先に </join:${client.application?.commands.cache.find(cmd => cmd.name === "join")?.id}> コマンドでボイスチャンネルに参加させてください。`,
+            "content": i18n.__(
+                "public.speechRecognition.noVoiceChannel",
+                `</join:${client.application?.commands.cache.find(cmd => cmd.name === "join")?.id}>`
+            ),
             "flags": [MessageFlags.Ephemeral]
         });
         return;
@@ -138,7 +144,7 @@ export default async function handleSpeechRecognitionCommand(client: Client, int
 
     if (recognitionMembers.size > 10) {
         await interaction.reply({
-            "content": "音声認識は最大10人まで対応しています。ボイスチャンネルの参加者を減らしてから再度実行してください。",
+            "content": i18n.__("public.speechRecognition.memberLimit"),
             "flags": [MessageFlags.Ephemeral]
         });
         return;
@@ -146,7 +152,7 @@ export default async function handleSpeechRecognitionCommand(client: Client, int
 
     if (interaction.channel?.type !== ChannelType.GuildText) {
         await interaction.reply({
-            "content": "このコマンドはテキストチャンネルで実行してください。",
+            "content": i18n.__("public.speechRecognition.textChannelOnly"),
             "flags": [MessageFlags.Ephemeral]
         });
         return;
@@ -157,13 +163,13 @@ export default async function handleSpeechRecognitionCommand(client: Client, int
     const webhooks = await interaction.channel.fetchWebhooks();
     await Promise.all(webhooks.map(async webhook => {
         if (webhook.name.endsWith("[VoiceJP]")) {
-            await webhook.delete("不要なVoiceJPのWebhookを削除");
+            await webhook.delete(i18n.__("public.speechRecognition.webhookDeleteReason"));
             webhooks.delete(webhook.id);
         }
     }));
     if ((webhooks.size + recognitionMembers.size) > 15) {
         await interaction.editReply({
-            "content": "テキストチャンネルのWebhookが上限に達しているため、音声認識を開始できません。不要なWebhookを削除してから再度実行してください。"
+            "content": i18n.__("public.speechRecognition.webhookLimit")
         });
         return;
     }
@@ -175,7 +181,7 @@ export default async function handleSpeechRecognitionCommand(client: Client, int
         await addMember(member, members, connection.connection, interaction.channel)
             .catch(() => {
                 interaction.followUp({
-                    "content": `<@${member.id}> さんの音声認識の開始に失敗しました。`
+                    "content": i18n.__("public.speechRecognition.memberStartFailed", `<@${member.id}>`)
                 });
             });
     }
@@ -210,14 +216,14 @@ export async function handleVoiceStateUpdate(oldState: VoiceState, newState: Voi
             const webhooks = await (interaction.channel as BaseGuildTextChannel).fetchWebhooks();
             if (members.size > 10) {
                 await interaction.followUp({
-                    "content": "音声認識は最大10人まで対応しています。ボイスチャンネルの参加者を減らしてから再度実行してください。",
+                    "content": i18n.__("public.speechRecognition.memberLimit"),
                     "flags": [MessageFlags.Ephemeral]
                 });
                 return;
             }
             if ((webhooks.size + 1) > 15) {
                 await interaction.followUp({
-                    "content": "テキストチャンネルのWebhookが上限に達しているため、音声認識を開始できません。不要なWebhookを削除してから再度実行してください。"
+                    "content": i18n.__("public.speechRecognition.webhookLimit")
                 });
                 return;
             }
@@ -228,7 +234,7 @@ export async function handleVoiceStateUpdate(oldState: VoiceState, newState: Voi
                 await addMember(newState.member, members, connection.connection, newState.guild.channels.cache.get(recognitionChannel.textChannelId) as BaseGuildTextChannel)
                     .catch(() => {
                         interaction.followUp({
-                            "content": `<@${memberId}> さんの音声認識の開始に失敗しました。`
+                            "content": i18n.__("public.speechRecognition.memberStartFailed", `<@${memberId}>`)
                         });
                     });
                 await replyMessage(interaction, members);

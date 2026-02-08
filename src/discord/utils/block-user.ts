@@ -2,6 +2,7 @@
     VoiceJP Discord Bot: Blocked User List
 */
 
+import i18n from "../../i18n.ts";
 import log from "../../utils/logger.ts";
 
 interface UserEntry {
@@ -29,7 +30,7 @@ function resolveUpdateIntervalMs() {
 
     const parsed = Number(rawValue);
     if (!Number.isFinite(parsed) || parsed <= 0) {
-        logger.warn(`Invalid BLOCKLIST_UPDATE_INTERVAL_MS: ${rawValue}. Using default.`);
+        logger.warn(i18n.__("internal.blocklist.invalidUpdateInterval", rawValue));
         return DEFAULT_UPDATE_INTERVAL_MS;
     }
 

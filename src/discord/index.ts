@@ -6,12 +6,15 @@ import "dotenv/config";
 
 import { Client, Events } from "discord.js";
 
+import i18n from "../i18n.ts";
 import log from "../utils/logger.ts";
 import { clientOptions, commands } from "./constants/index.ts";
 import { handleJoinCommand } from "./handlers/commands/join.ts";
 import { handleLeaveCommand } from "./handlers/commands/leave.ts";
 import handlePingCommand from "./handlers/commands/ping.ts";
-import handleSpeechRecognitionCommand, { handleVoiceStateUpdate } from "./handlers/commands/speech-recognition.ts";
+import handleSpeechRecognitionCommand, {
+    handleVoiceStateUpdate
+} from "./handlers/commands/speech-recognition.ts";
 import handleSpeechSynthesisCommand from "./handlers/commands/speech-synthesis.ts";
 import handleUndefinedCommand from "./handlers/commands/undefined-command.ts";
 import { handleMessageCreateEvent } from "./handlers/message.ts";
@@ -29,7 +32,7 @@ const synthesisChannels: SynthesisChannels = new Map();
 const recognitionChannels: RecognitionChannels = new RecognitionChannelMap();
 
 client.on(Events.ClientReady, readyClient => {
-    logger.info(`Logged in as ${readyClient.user.tag}`);
+    logger.info(i18n.__("internal.discord.loggedInAs", readyClient.user.tag));
 
     setActivity(readyClient, connections);
     setInterval(() => setActivity(readyClient, connections), 10 * 60 * 1000);

@@ -4,6 +4,8 @@
 
 import { ChannelType, GatewayIntentBits, SlashCommandBuilder } from "discord.js";
 
+import i18n from "../../i18n.ts";
+
 import type { ClientOptions } from "discord.js";
 
 export const clientOptions: ClientOptions = {
@@ -22,36 +24,36 @@ export const commands = [
     // Basic Commands
     new SlashCommandBuilder()
         .setName("ping")
-        .setDescription("Botの現在情報を表示します。"),
+        .setDescription(i18n.__("public.commands.pingDescription")),
     new SlashCommandBuilder()
         .setName("help")
-        .setDescription("利用可能なコマンドの一覧を表示します。"),
+        .setDescription(i18n.__("public.commands.helpDescription")),
     // Join & Leave Command
     new SlashCommandBuilder()
         .setName("join")
-        .setDescription("Botをボイスチャンネルに参加させます。")
+        .setDescription(i18n.__("public.commands.joinDescription"))
         .addChannelOption(option =>
             option
                 .setName("channel")
-                .setDescription("Botを参加させるボイスチャンネルを選択します。")
+                .setDescription(i18n.__("public.commands.joinChannelDescription"))
                 .setRequired(true)
                 .addChannelTypes(ChannelType.GuildVoice, ChannelType.GuildStageVoice)
         ),
     new SlashCommandBuilder()
         .setName("leave")
-        .setDescription("Botをボイスチャンネルから退出させます。"),
+        .setDescription(i18n.__("public.commands.leaveDescription")),
     // Speech Commands
     new SlashCommandBuilder()
         .setName("speech")
-        .setDescription("声に関するコマンドです。")
+        .setDescription(i18n.__("public.commands.speechDescription"))
         .addSubcommand(subcommand =>
             subcommand
                 .setName("synthesis")
-                .setDescription("メッセージを音声合成で再生します。")
+                .setDescription(i18n.__("public.commands.speechSynthesisDescription"))
         )
         .addSubcommand(subcommand =>
             subcommand
                 .setName("recognition")
-                .setDescription("音声認識を開始します。")
+                .setDescription(i18n.__("public.commands.speechRecognitionDescription"))
         )
 ];

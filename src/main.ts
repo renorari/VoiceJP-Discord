@@ -9,6 +9,7 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 
+import i18n from "./i18n.ts";
 import log from "./utils/logger.ts";
 import accessLogMiddleware from "./utils/middlewares/log.ts";
 
@@ -27,9 +28,9 @@ server.use(express.urlencoded({ "extended": true }));
 server.use(express.static("public"));
 
 server.use((req, res) => {
-    res.status(404).json({ "status": "error", "message": "Not Found" });
+    res.status(404).json({ "status": "error", "message": i18n.__("public.server.notFound") });
 });
 
 server.listen(PORT, () => {
-    logger.info(`listening on ${BASE_URL}`);
+    logger.info(i18n.__("internal.server.listening", BASE_URL));
 });

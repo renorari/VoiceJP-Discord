@@ -2,6 +2,7 @@
     VoiceJP Discord Bot Recognition Utilities
 */
 
+import i18n from "../../i18n.ts";
 import log from "../../utils/logger.ts";
 
 import type { RecognitionChannel, RecognitionMemberData } from "../../types/index.d.ts";
@@ -34,7 +35,7 @@ export async function cleanupRecognitionChannel(channel?: RecognitionChannel): P
         safeDestroy(voice);
         safeFree(recognizer);
         if (webhook) {
-            deletions.push(webhook.delete("不要なVoiceJPのWebhookを削除").catch(() => undefined));
+            deletions.push(webhook.delete(i18n.__("public.speechRecognition.webhookDeleteReason")).catch(() => undefined));
         }
     }
 
@@ -70,7 +71,7 @@ export class MemberRecognitionDataMap extends Map<string, RecognitionMemberData>
             safeDestroy(data.voice);
             safeFree(data.recognizer);
             if (data.webhook) {
-                void data.webhook.delete("不要なVoiceJPのWebhookを削除").catch(() => undefined);
+                void data.webhook.delete(i18n.__("public.speechRecognition.webhookDeleteReason")).catch(() => undefined);
             }
         }
         return super.delete(key);
