@@ -45,8 +45,9 @@ export default function synthesizeSpeech(text: string) {
     openJTalk.stdin.end();
 
     return new Promise<string>((resolve, reject) => {
-        openJTalk.on("error", err => {
-            reject(new Error(i18n.__("internal.speech.openJTalkStartFailed", err.message)));
+        openJTalk.on("error", error => {
+            logger.error(error);
+            reject(new Error(i18n.__("internal.speech.openJTalkStartFailed", error.message)));
         });
 
         openJTalk.on("close", code => {
