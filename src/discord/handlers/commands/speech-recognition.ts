@@ -86,12 +86,14 @@ async function addMember(member: GuildMember, members: MemberRecognitionDataMap,
 }
 
 async function replyMessage(interaction: ChatInputCommandInteraction, members: MemberRecognitionDataMap) {
+    const membersList = Array.from(members.values());
+
     interaction.editReply({
         "content": i18n.__("public.speechRecognition.enabled"),
         "embeds": [
             new EmbedBuilder()
                 .setTitle(i18n.__("public.speechRecognition.activeMembers"))
-                .setDescription(Array.from(members.values()).map(m => `- <@${m.member.id}>`).join("\n"))
+                .setDescription(membersList.length === 0 ? i18n.__("public.speechRecognition.noActiveMembers") : membersList.map(m => `- <@${m.member.id}>`).join("\n"))
                 .setColor(Colors.DarkBlue)
         ]
     }).catch(() => {
@@ -99,7 +101,7 @@ async function replyMessage(interaction: ChatInputCommandInteraction, members: M
             "embeds": [
                 new EmbedBuilder()
                     .setTitle(i18n.__("public.speechRecognition.activeMembers"))
-                    .setDescription(Array.from(members.values()).map(m => `- <@${m.member.id}>`).join("\n"))
+                    .setDescription(membersList.length === 0 ? i18n.__("public.speechRecognition.noActiveMembers") : membersList.map(m => `- <@${m.member.id}>`).join("\n"))
                     .setColor(Colors.DarkBlue)
             ]
         });
@@ -197,7 +199,7 @@ export default async function handleSpeechRecognitionCommand(client: Client, int
     await replyMessage(interaction, members);
 }
 
-export async function handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState, connections: Connections, recognitionChannels: RecognitionChannels) {
+export async function handleVoiceStateUpdateRecognition(oldState: VoiceState, newState: VoiceState, connections: Connections, recognitionChannels: RecognitionChannels) {
     if (!newState.guild.id) return;
     const recognitionChannel = recognitionChannels.get(newState.guild.id);
     if (!recognitionChannel) return;

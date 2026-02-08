@@ -14,11 +14,12 @@ import { handleJoinCommand } from "./handlers/commands/join.ts";
 import { handleLeaveCommand } from "./handlers/commands/leave.ts";
 import handlePingCommand from "./handlers/commands/ping.ts";
 import handleSpeechRecognitionCommand, {
-    handleVoiceStateUpdate
+    handleVoiceStateUpdateRecognition
 } from "./handlers/commands/speech-recognition.ts";
 import handleSpeechSynthesisCommand from "./handlers/commands/speech-synthesis.ts";
 import handleUndefinedCommand from "./handlers/commands/undefined-command.ts";
 import { handleMessageCreateEvent } from "./handlers/message.ts";
+import { handleVoiceStateUpdate } from "./handlers/voice-state-update.ts";
 import setActivity from "./utils/activity.ts";
 import nrCheck from "./utils/block-user.ts";
 import RecognitionChannelMap from "./utils/recognition.ts";
@@ -95,7 +96,8 @@ client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
     if (nrCheck(newState.id) || nrCheck(newState.guild.id)) return;
     if (oldState.channelId === newState.channelId) return;
 
-    await handleVoiceStateUpdate(oldState, newState, connections, recognitionChannels);
+    await handleVoiceStateUpdateRecognition(oldState, newState, connections, recognitionChannels);
+    await handleVoiceStateUpdate(oldState, newState, connections, synthesisChannels, recognitionChannels);
 });
 
 client.login(process.env.DISCORD_BOT_TOKEN);

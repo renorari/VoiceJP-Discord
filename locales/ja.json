@@ -79,6 +79,7 @@
             "guildOnly": "このコマンドはサーバー内でのみ使用できます。",
             "memberLimit": "音声認識は最大10人まで対応しています。ボイスチャンネルの参加者を減らしてから再度実行してください。",
             "memberStartFailed": "%s さんの音声認識の開始に失敗しました。",
+            "noActiveMembers": "音声認識中のメンバーはいません。",
             "noVoiceChannel": "Botが参加しているボイスチャンネルがありません。先に %s コマンドでボイスチャンネルに参加させてください。",
             "textChannelOnly": "このコマンドはテキストチャンネルで実行してください。",
             "webhookDeleteReason": "不要なVoiceJPのWebhookを削除",
