@@ -82,7 +82,7 @@ export default async function sendAdMessage(channel: GuildTextBasedChannel) {
     if (!("createWebhook" in channel)) {
         const message = await channel.send(ad);
         setTimeout(() => {
-            message.delete().catch();
+            message.delete().catch(() => {});
         }, 10 * 60 * 1000);
         return;
     };
@@ -93,6 +93,6 @@ export default async function sendAdMessage(channel: GuildTextBasedChannel) {
     const message = await webhook.send(ad);
     await webhook.delete();
     setTimeout(() => {
-        message.delete().catch();
+        message.delete().catch(() => {});
     }, 10 * 60 * 1000);
 }
