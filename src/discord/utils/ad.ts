@@ -18,7 +18,7 @@ const ads: (string | MessagePayload | MessageCreateOptions)[] = [
                 .addFields(
                     {
                         "name": "🔥 Campfireからのご支援(審査中)",
-                        "value": "クラウドファンディングプラットフォーム「Campfire」を通じて、VoiceJPの運営を支援していただけます。詳細は以下のリンクをご覧ください。\n[Campfire VoiceJP支援ページ](https://camp-fire.jp/projects/927913/view)"
+                        "value": "クラウドファンディングプラットフォーム「Campfire」を通じて、VoiceJPの運営を支援していただけます(予定)。詳細は以下のリンクをご覧ください。\n[Campfire VoiceJP支援ページ](https://camp-fire.jp/projects/927913/view)"
                     },
                     {
                         "name": "🧾 PayPalからのご支援",
