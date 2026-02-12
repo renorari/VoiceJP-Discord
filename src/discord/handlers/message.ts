@@ -29,7 +29,7 @@ export async function handleMessageCreateEvent(client: Client, message: OmitPart
                 channel.player.play(resource);
             });
 
-            if (Math.random() < 0.1) sendAdMessage(message.channel as GuildTextBasedChannel).catch(() => {});
+            if (Math.random() < 0.01) sendAdMessage(message.channel as GuildTextBasedChannel).catch(() => {});
         }
     });
 }
