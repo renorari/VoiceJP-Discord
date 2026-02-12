@@ -152,7 +152,7 @@ export default async function handleSpeechRecognitionCommand(client: Client, int
         return;
     }
 
-    if (interaction.channel?.type !== ChannelType.GuildText) {
+    if (interaction.channel?.type !== ChannelType.GuildText && interaction.channel?.type !== ChannelType.GuildVoice) {
         await interaction.reply({
             "content": i18n.__("public.speechRecognition.textChannelOnly"),
             "flags": [MessageFlags.Ephemeral]
