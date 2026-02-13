@@ -31,7 +31,7 @@ fs.stat(voskModelPath).catch(() => {
 });
 const voskModel = new vosk.Model(voskModelPath);
 
-async function addMember(member: GuildMember, members: MemberRecognitionDataMap, connection: VoiceConnection, channel: BaseGuildTextChannel) {
+async function addMember(member: GuildMember, members: MemberRecognitionDataMap, connection: VoiceConnection, channel: BaseGuildTextChannel | VoiceBasedChannel) {
     const username = member.displayName.length > 10 ? member.displayName.slice(0, 10) : member.displayName;
     const webhook = await (channel as BaseGuildTextChannel).createWebhook({
         "name": `${username} [VoiceJP]`,
