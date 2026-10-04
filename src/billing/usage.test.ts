@@ -5,10 +5,11 @@ import "dotenv/config";
 import assert from "node:assert/strict";
 import { after, test } from "node:test";
 
-import { grantCredits } from "./credits.ts";
+import { getBalance, grantCredits, speechCost, transcriptionCost } from "./credits.ts";
 
 const skip = !process.env.DATABASE_URL;
 const guildId = `test-${Date.now()}-usage`;
+const INITIAL_CREDITS = 100;
 
 process.env.OPENAI_API_KEY = "sk-test";
 const { default: prisma } = await import("../db/prisma.ts");
@@ -26,17 +27,17 @@ test("クレジットがないサーバーは有料のエンジンを使わな�
 });
 
 test("クレジットがあると有料のエンジンを使う", { skip }, async () => {
-    await grantCredits({ guildId, "amount": 30, "type": "TOPUP" });
+    await grantCredits({ guildId, "amount": INITIAL_CREDITS, "type": "TOPUP" });
 
     assert.equal(await hasCredits(guildId), true);
 });
 
 test("読み上げと文字起こしの使用量だけクレジットが減る", { skip }, async () => {
     await chargeSpeech(guildId, 100);
-    assert.equal((await prisma.guildBilling.findUniqueOrThrow({ "where": { guildId } })).credits, 24);
+    assert.equal(await getBalance(guildId), INITIAL_CREDITS - speechCost(100));
 
     assert.equal(await chargeTranscription(guildId, 30, "member"), false);
-    assert.equal((await prisma.guildBilling.findUniqueOrThrow({ "where": { guildId } })).credits, 14);
+    assert.equal(await getBalance(guildId), INITIAL_CREDITS - speechCost(100) - transcriptionCost(30));
 });
 
 test("使い切ったら文字起こしが true (切り替え合図) を返す", { skip }, async () => {

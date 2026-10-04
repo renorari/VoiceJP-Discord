@@ -5,6 +5,7 @@ import "dotenv/config";
 import assert from "node:assert/strict";
 import { after, test } from "node:test";
 
+import { SPEECH_CREDITS_PER_100_CHARACTERS, TRANSCRIPTION_CREDITS_PER_MINUTE } from "./constants.ts";
 import { consumeCredits, getBalance, grantCredits, speechCost, transcriptionCost } from "./credits.ts";
 
 const skip = !process.env.DATABASE_URL;
@@ -20,9 +21,9 @@ after(async () => {
 });
 
 test("使用量からクレジットを計算する", () => {
-    assert.equal(transcriptionCost(60), 20);
+    assert.equal(transcriptionCost(60), TRANSCRIPTION_CREDITS_PER_MINUTE);
     assert.equal(transcriptionCost(1), 1);
-    assert.equal(speechCost(100), 6);
+    assert.equal(speechCost(100), SPEECH_CREDITS_PER_100_CHARACTERS);
     assert.equal(speechCost(1), 1);
 });
 
