@@ -10,6 +10,6 @@ const SNOWFLAKE_PATTERN = /^\d{17,20}$/;
 export default async function requireGuildManager(req: Request<{ guildId: string }>, res: Response, next: NextFunction) {
     if (!SNOWFLAKE_PATTERN.test(req.params.guildId)) throw new HttpError(400);
 
-    await assertCanManageGuild(req.headers, req.params.guildId);
+    await assertCanManageGuild(res.locals.session.user.id, req.headers, req.params.guildId);
     next();
 }

@@ -18,7 +18,7 @@ router.get("/me", requireSession, (req, res) => {
 });
 
 router.get("/guilds", requireSession, async (req, res) => {
-    res.json({ "status": "ok", "guilds": await fetchManageableGuilds(req.headers) });
+    res.json({ "status": "ok", "guilds": await fetchManageableGuilds(res.locals.session.user.id, req.headers) });
 });
 
 router.use(billingRouter);
