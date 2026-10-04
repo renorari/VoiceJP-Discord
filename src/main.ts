@@ -1,5 +1,5 @@
 // VoiceJP
 
-import "./discord.ts";
-import "./web.ts";
+import "./discord/index.ts";
+import "./web/index.ts";
 
