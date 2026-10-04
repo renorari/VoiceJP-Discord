@@ -8,6 +8,12 @@ const TRANSACTION_LABELS = {
     "USAGE_SPEECH": "読み上げ",
     "ADJUSTMENT": "調整"
 };
+const RECORDING_STATUS_LABELS = {
+    "RECORDING": "録音中",
+    "PROCESSING": "保存中",
+    "FAILED": "失敗"
+};
+const PANELS = ["plans", "topup", "recordings", "history"];
 const MESSAGES = {
     "standard": "標準モード (無料) で動作しています。クレジットを追加すると、高精度なAIの文字起こしと読み上げが使えます。",
     "low": "クレジットが残りわずかです。無くなると、自動で標準モード (無料) に切り替わります。",
@@ -18,7 +24,7 @@ const MESSAGES = {
 
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
-const state = { "user": null, "guilds": [], "plans": null, "guild": null, "billing": null };
+const state = { "user": null, "guilds": [], "plans": null, "guild": null, "billing": null, "recordings": [] };
 
 // --- 基本の部品 ---
 
@@ -97,6 +103,11 @@ function confirmDialog(title, message, okLabel) {
 const yen = value => `${value.toLocaleString("ja-JP")}円`;
 const number = value => value.toLocaleString("ja-JP");
 const formatDate = value => new Date(value).toLocaleDateString("ja-JP", { "year": "numeric", "month": "long", "day": "numeric" });
+const formatDuration = seconds => seconds >= 60 ? `${Math.floor(seconds / 60)}分${seconds % 60}秒` : `${seconds}秒`;
+const formatClock = milliseconds => {
+    const total = Math.floor(milliseconds / 1000);
+    return [Math.floor(total / 3600), Math.floor(total / 60) % 60, total % 60].map(value => String(value).padStart(2, "0")).join(":");
+};
 const formatDateTime = value => new Date(value).toLocaleString("ja-JP", { "month": "numeric", "day": "numeric", "hour": "2-digit", "minute": "2-digit" });
 
 // クレジットを、文字起こしの時間と読み上げの文字数に直した目安
@@ -197,6 +208,7 @@ function planCard(id, plan) {
         h("div", { "className": "price" }, yen(plan.yen), h("small", { "textContent": " / 月" })),
         h("p", { "className": "detail", "textContent": `毎月 ${number(plan.credits)} クレジット` }),
         h("p", { "className": "detail", "textContent": `文字起こし ${rates.transcription}、または読み上げ ${rates.speech}` }),
+        h("p", { "className": "detail", "textContent": "通話の録音・自動文字起こし付き" }),
         button
     );
 }
@@ -214,6 +226,77 @@ function packCard(id, pack) {
         h("p", { "className": "detail", "textContent": `文字起こし ${rates.transcription}、または読み上げ ${rates.speech}` }),
         button
     );
+}
+
+function recordingUrl(id, suffix = "") {
+    return `/api/guilds/${state.guild.id}/recordings/${id}${suffix}`;
+}
+
+async function showTranscript(recording, container, button) {
+    if (container.childElementCount > 0) {
+        container.replaceChildren();
+        button.textContent = "文字起こしを見る";
+        return;
+    }
+
+    const { transcript } = await api(`/guilds/${state.guild.id}/recordings/${recording.id}`);
+    container.replaceChildren(...(transcript.length === 0
+        ? [h("p", { "className": "helper-text", "textContent": "文字起こしはありません。" })]
+        : [h("ol", { "className": "transcript" }, ...transcript.map(entry => h("li", {},
+            h("span", { "className": "time", "textContent": formatClock(entry.at) }),
+            h("span", { "className": "speaker", "textContent": entry.name }),
+            h("span", { "textContent": entry.text.replace(/\n/g, "") })
+        )))]));
+    button.textContent = "文字起こしを閉じる";
+}
+
+async function removeRecording(recording) {
+    if (!await confirmDialog("この録音を削除しますか?", "音声と文字起こしが削除され、元に戻せません。", "削除する")) return;
+
+    await api(`/guilds/${state.guild.id}/recordings/${recording.id}`, { "method": "DELETE" });
+    state.recordings = state.recordings.filter(item => item.id !== recording.id);
+    renderRecordings();
+}
+
+function recordingCard(recording) {
+    const ready = recording.status === "READY";
+    const transcript = h("div");
+    const actions = h("div", { "className": "actions" });
+
+    if (ready && recording.transcriptCount > 0) {
+        const button = h("button", { "className": "button secondary compact", "type": "button", "textContent": "文字起こしを見る" });
+        button.addEventListener("click", () => run(button, () => showTranscript(recording, transcript, button)));
+        actions.append(button);
+    }
+    if (ready && recording.hasAudio) {
+        actions.append(h("a", { "className": "button secondary compact", "href": recordingUrl(recording.id, "/audio?download=1"), "textContent": "音声を保存" }));
+    }
+    if (ready && recording.transcriptCount > 0) {
+        actions.append(h("a", { "className": "button secondary compact", "href": recordingUrl(recording.id, "/transcript.txt"), "textContent": "テキストを保存" }));
+    }
+    if (ready || recording.status === "FAILED") {
+        const remove = h("button", { "className": "button tertiary compact", "type": "button", "textContent": "削除" });
+        remove.addEventListener("click", () => run(remove, () => removeRecording(recording)));
+        actions.append(remove);
+    }
+
+    return h("article", { "className": "card-item recording" },
+        h("div", { "className": "title" },
+            h("span", { "textContent": formatDateTime(recording.startedAt) }),
+            ready ? "" : h("span", { "className": "chip", "textContent": RECORDING_STATUS_LABELS[recording.status] })),
+        h("p", { "className": "detail", "textContent": `${recording.durationSeconds ? `録音時間 ${formatDuration(recording.durationSeconds)} ・ ` : ""}${formatDate(recording.expiresAt)}に自動で削除` }),
+        ready && recording.hasAudio ? h("audio", { "controls": true, "preload": "none", "src": recordingUrl(recording.id, "/audio") }) : "",
+        actions,
+        transcript
+    );
+}
+
+function renderRecordings() {
+    const none = state.recordings.length === 0;
+
+    $("recordings-promo").hidden = !(none && !isSubscribed());
+    $("recordings-empty").hidden = !(none && isSubscribed());
+    $("recordings").replaceChildren(...state.recordings.map(recordingCard));
 }
 
 function renderHistory() {
@@ -239,6 +322,7 @@ function renderBilling() {
     $("plans").replaceChildren(...Object.entries(state.plans.subscriptionPlans).map(([id, plan]) => planCard(id, plan)));
     $("packs").replaceChildren(...Object.entries(state.plans.topupPacks).map(([id, pack]) => packCard(id, pack)));
     renderHistory();
+    renderRecordings();
 }
 
 function showPanel(name) {
@@ -256,7 +340,7 @@ function showPanel(name) {
 async function loadBilling() {
     // 支払い直後やコンビニ払いの完了を反映するため、Stripe の最新の状態を取り込んでから表示する
     await post(`/guilds/${state.guild.id}/billing/sync`);
-    state.billing = await api(`/guilds/${state.guild.id}/billing`);
+    [state.billing, { "recordings": state.recordings }] = await Promise.all([api(`/guilds/${state.guild.id}/billing`), api(`/guilds/${state.guild.id}/recordings`)]);
     renderBilling();
 }
 
@@ -271,7 +355,7 @@ async function selectGuild(guildId) {
     try {
         await loadBilling();
         showView("billing");
-        showPanel("plans");
+        showPanel(PANELS.includes(params.get("tab")) ? params.get("tab") : "plans");
     } catch (error) {
         notice("destructive", error.message);
         showView("guilds");
@@ -306,6 +390,7 @@ function bindEvents() {
         await post("/auth/sign-out");
         location.href = "/dashboard/";
     }));
+    $("to-plans").addEventListener("click", () => showPanel("plans"));
     $("portal").addEventListener("click", event => run(event.currentTarget, () => redirectTo(`/guilds/${state.guild.id}/portal`)));
     $("back").addEventListener("click", () => {
         clearNotice();

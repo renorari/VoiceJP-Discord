@@ -33,7 +33,7 @@ async function render() {
         const yen = value => `${value.toLocaleString("ja-JP")}円`;
         const number = value => value.toLocaleString("ja-JP");
 
-        const plans = Object.values(subscriptionPlans).map(plan => card(`${plan.name}プラン`, `${yen(plan.yen)} / 月`, [`毎月 ${number(plan.credits)} クレジット`]));
+        const plans = Object.values(subscriptionPlans).map(plan => card(`${plan.name}プラン`, `${yen(plan.yen)} / 月`, [`毎月 ${number(plan.credits)} クレジット`, "通話の録音・自動文字起こし付き"]));
         const packs = Object.values(topupPacks).map(pack => card(`${number(pack.credits)} クレジット`, yen(pack.yen), ["必要なときに追加購入"]));
 
         planList.replaceChildren(...plans);

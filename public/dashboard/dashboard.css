@@ -346,6 +346,50 @@ hgroup p {
     border-radius: var(--sui-roundness-normal);
 }
 
+/* 録音 */
+.recording audio {
+    width: 100%;
+    margin-block: 8px;
+}
+
+.recording .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.recording .actions a.button {
+    text-decoration: none;
+}
+
+.transcript {
+    margin: 8px 0 0;
+    padding: 12px;
+    max-height: 320px;
+    overflow-y: auto;
+    list-style: none;
+    background: var(--sui-color-highlight-secondary);
+    border-radius: var(--sui-roundness-normal);
+    font-size: .9375rem;
+}
+
+.transcript li {
+    display: flex;
+    gap: 8px;
+    padding-block: 2px;
+}
+
+.transcript .time {
+    flex: none;
+    color: var(--sui-color-neutral-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.transcript .speaker {
+    flex: none;
+    font-weight: 600;
+}
+
 /* 履歴 */
 .num {
     text-align: right;

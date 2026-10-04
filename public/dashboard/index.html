@@ -76,11 +76,12 @@
             <div class="tabs" role="tablist" aria-label="メニュー">
                 <button class="tab-item active" role="tab" id="tab-plans" aria-controls="panel-plans" aria-selected="true" type="button" data-panel="plans">月額プラン</button>
                 <button class="tab-item" role="tab" id="tab-topup" aria-controls="panel-topup" aria-selected="false" type="button" data-panel="topup">追加購入</button>
+                <button class="tab-item" role="tab" id="tab-recordings" aria-controls="panel-recordings" aria-selected="false" type="button" data-panel="recordings">録音</button>
                 <button class="tab-item" role="tab" id="tab-history" aria-controls="panel-history" aria-selected="false" type="button" data-panel="history">履歴</button>
             </div>
 
             <div id="panel-plans" role="tabpanel" aria-labelledby="tab-plans">
-                <p class="helper-text">毎月クレジットが付与されます。使い切れなかった分は翌月に繰り越されます。</p>
+                <p class="helper-text">毎月クレジットが付与されます。使い切れなかった分は翌月に繰り越されます。月額プランの特典として、通話の録音と自動文字起こし (<code>/record</code>) も使えます。</p>
                 <dl id="subscription-info" class="key-value info" hidden></dl>
                 <div id="plans" class="cards"></div>
                 <p class="helper-text">プランの変更は、次回の更新日から反映されます。解約や支払い方法の変更は「支払いの管理」から行えます。</p>
@@ -89,6 +90,16 @@
             <div id="panel-topup" role="tabpanel" aria-labelledby="tab-topup" hidden>
                 <p class="helper-text">必要なときに、必要な分だけ追加できます。残高に期限はありません。</p>
                 <div id="packs" class="cards"></div>
+            </div>
+
+            <div id="panel-recordings" role="tabpanel" aria-labelledby="tab-recordings" hidden>
+                <div id="recordings-promo" class="callout info" hidden>
+                    <p>月額プランに加入すると、通話の録音と自動文字起こしが使えます。</p>
+                    <button id="to-plans" class="button compact" type="button">プランを見る</button>
+                </div>
+                <p id="recordings-empty" class="helper-text" hidden>まだ録音がありません。通話に参加した状態で <code>/record start</code> を実行すると、録音と自動文字起こしが始まります。</p>
+                <div id="recordings" class="cards"></div>
+                <p class="helper-text">録音と文字起こしは、30日後に自動で削除されます。文字起こしにはクレジットを使います (無くなると標準の文字起こしに切り替わります)。</p>
             </div>
 
             <div id="panel-history" role="tabpanel" aria-labelledby="tab-history" hidden>
@@ -118,7 +129,7 @@
             <p id="confirm-message"></p>
             <div class="dialog-actions">
                 <button class="button tertiary" value="cancel">キャンセル</button>
-                <button class="button" value="ok">変更する</button>
+                <button class="button" value="ok">OK</button>
             </div>
         </form>
     </dialog>
