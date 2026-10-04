@@ -15,6 +15,7 @@ import { errorHandler, notFoundHandler } from "./middlewares/error.ts";
 import logMiddleware from "./middlewares/log.ts";
 
 const PUBLIC_DIR = "public";
+const SASHIMI_UI_DIR = "node_modules/sashimi-ui/dist/css";
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const PORT = parseInt(process.env.PORT || "3000", 10);
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
@@ -23,10 +24,16 @@ const logger = log.getLogger("web");
 
 const app = express();
 
-// Safari は localhost の http でも https への自動切り替えをするので、本番以外では外す
-app.use(helmet(IS_PRODUCTION ? {} : {
-    "contentSecurityPolicy": { "directives": { "upgrade-insecure-requests": null } },
-    "strictTransportSecurity": false
+// ダッシュボードで Discord のアイコンを表示するため、画像は Discord の CDN も許可する
+// Safari は localhost の http でも https への自動切り替えをするので、本番以外ではそれを外す
+app.use(helmet({
+    "contentSecurityPolicy": {
+        "directives": {
+            "img-src": ["'self'", "data:", "https://cdn.discordapp.com"],
+            ...IS_PRODUCTION ? {} : { "upgrade-insecure-requests": null }
+        }
+    },
+    "strictTransportSecurity": IS_PRODUCTION
 }));
 app.use(cors());
 app.use(logMiddleware(log.getLogger("access")));
@@ -37,6 +44,7 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use(express.json());
 app.use(express.urlencoded({ "extended": true }));
 
+app.use("/vendor/sashimi-ui", express.static(SASHIMI_UI_DIR));
 app.use(express.static(PUBLIC_DIR));
 
 app.use("/api", apiRouter);

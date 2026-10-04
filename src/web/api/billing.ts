@@ -2,7 +2,7 @@
 
 import express from "express";
 
-import { SUBSCRIPTION_PLANS, TOPUP_PACKS } from "../../billing/constants.ts";
+import { CREDITS_PER_YEN, SPEECH_CREDITS_PER_100_CHARACTERS, SUBSCRIPTION_PLANS, TOPUP_PACKS, TRANSCRIPTION_CREDITS_PER_MINUTE } from "../../billing/constants.ts";
 import { changeSubscriptionPlan, createPortalSession, createSubscriptionCheckout, createTopupCheckout, isPlanId } from "../../billing/stripe.ts";
 import { syncGuildBilling } from "../../billing/stripe-sync.ts";
 import prisma from "../../db/prisma.ts";
@@ -21,7 +21,14 @@ const lastSyncs = new Map<string, number>();
 const router = express.Router();
 
 router.get("/plans", (req, res) => {
-    res.json({ "status": "ok", "subscriptionPlans": SUBSCRIPTION_PLANS, "topupPacks": TOPUP_PACKS });
+    res.json({
+        "status": "ok",
+        "subscriptionPlans": SUBSCRIPTION_PLANS,
+        "topupPacks": TOPUP_PACKS,
+        "creditsPerYen": CREDITS_PER_YEN,
+        "transcriptionCreditsPerMinute": TRANSCRIPTION_CREDITS_PER_MINUTE,
+        "speechCreditsPer100Characters": SPEECH_CREDITS_PER_100_CHARACTERS
+    });
 });
 
 router.use("/guilds/:guildId", requireSession, requireGuildManager);

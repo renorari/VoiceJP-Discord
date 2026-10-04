@@ -3,185 +3,125 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
     <meta name="robots" content="noindex">
     <title>VoiceJP | ダッシュボード</title>
     <link rel="icon" href="/favicon.ico">
-    <style>
-        :root {
-            --background: #edeae8;
-            --surface: #fff;
-            --text-color: #503f35;
-            --primary-color: #2F4673;
-            --secondary-color: #5872A6;
-            --border-color: #d8d2cd;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            background: var(--background);
-            color: var(--text-color);
-            font-family: Arial, sans-serif;
-        }
-
-        header,
-        main {
-            max-width: 720px;
-            margin: 0 auto;
-            padding: 16px;
-        }
-
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        h1,
-        h2 {
-            margin: 0 0 12px;
-            color: var(--primary-color);
-        }
-
-        section {
-            margin-bottom: 16px;
-            padding: 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: var(--surface);
-        }
-
-        button {
-            padding: 8px 16px;
-            border: 0;
-            border-radius: 6px;
-            background: var(--primary-color);
-            color: #fff;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        button.secondary {
-            background: var(--secondary-color);
-        }
-
-        button:disabled {
-            opacity: .5;
-            cursor: default;
-        }
-
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .plan {
-            flex: 1 1 180px;
-            padding: 12px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-        }
-
-        .plan.current {
-            border-color: var(--primary-color);
-        }
-
-        .plan p {
-            margin: 4px 0;
-        }
-
-        .credits {
-            font-size: 32px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .guild {
-            display: block;
-            width: 100%;
-            margin-bottom: 8px;
-            text-align: left;
-            background: var(--surface);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-
-        td {
-            padding: 6px 4px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        td:last-child {
-            text-align: right;
-        }
-
-        .muted {
-            color: #8a7b71;
-            font-size: 14px;
-        }
-
-        [hidden] {
-            display: none !important;
-        }
-    </style>
+    <link rel="stylesheet" href="/vendor/sashimi-ui/default.theme.css">
+    <link rel="stylesheet" href="/vendor/sashimi-ui/bundle.css">
+    <link rel="stylesheet" href="/dashboard/dashboard.css">
 </head>
 
 <body>
-    <header>
-        <h1>VoiceJP ダッシュボード</h1>
-        <div>
-            <span id="user" class="muted"></span>
-            <button id="logout" class="secondary" hidden>ログアウト</button>
+    <header class="app-bar">
+        <a class="brand" href="/dashboard/">VoiceJP</a>
+        <div id="account" class="account" hidden>
+            <img id="avatar" class="avatar" alt="" width="32" height="32">
+            <span id="user-name"></span>
+            <button id="logout" class="button tertiary compact" type="button">ログアウト</button>
         </div>
     </header>
 
-    <main>
-        <p id="message" class="muted" hidden></p>
+    <main class="container">
+        <div id="notice" role="status" aria-live="polite" hidden></div>
 
-        <section id="login" hidden>
-            <h2>ログイン</h2>
-            <p class="muted">サーバーのクレジットを管理するには、Discordでログインしてください。</p>
-            <div class="row"><button id="login-button">Discordでログイン</button></div>
+        <!-- 1. ログイン -->
+        <section id="view-login" class="view" hidden>
+            <hgroup class="hero">
+                <h1>通話を、もっと使いやすく。</h1>
+                <p>クレジットを追加すると、文字起こしと読み上げが高精度なAIに切り替わります。</p>
+            </hgroup>
+            <ul class="feature-list">
+                <li>サーバーごとに、必要な分だけ</li>
+                <li>無くなっても、無料の標準モードで使い続けられます</li>
+                <li>購入できるのは「サーバー管理」権限を持つ人だけです</li>
+            </ul>
+            <button id="login" class="button wide" type="button">Discordでログイン</button>
         </section>
 
-        <section id="guilds" hidden>
-            <h2>サーバーを選ぶ</h2>
-            <p class="muted">「サーバー管理」権限を持つサーバーが表示されます。</p>
-            <div id="guild-list"></div>
+        <!-- 2. サーバーを選ぶ -->
+        <section id="view-guilds" class="view" hidden>
+            <hgroup>
+                <h1>サーバーを選ぶ</h1>
+                <p>「サーバー管理」権限のあるサーバーが表示されます。</p>
+            </hgroup>
+            <ul id="guild-list" class="list"></ul>
+            <p id="guild-empty" class="helper-text" hidden>管理できるサーバーがありません。</p>
         </section>
 
-        <section id="billing" hidden>
-            <h2 id="guild-name"></h2>
-            <p class="muted">クレジット残高</p>
-            <p class="credits" id="credits"></p>
-            <p class="muted" id="subscription"></p>
-            <p class="muted">クレジットがあるサーバーでは、OpenAIによる高精度な文字起こしと読み上げが使われます。残高がなくなると、無料の音声認識・合成に戻ります。</p>
+        <!-- 3. 残高とプラン -->
+        <section id="view-billing" class="view" hidden>
+            <button id="back" class="link back" type="button">‹ サーバーを選び直す</button>
 
-            <h2 style="margin-top: 20px;">月額プラン</h2>
-            <p class="muted">毎月クレジットが付与されます (使い切れなかった分は繰り越されます)。プランの変更は、次回の更新日から反映されます。</p>
-            <div class="row" id="plans"></div>
-            <div class="row">
-                <button id="portal" class="secondary">支払いの管理・解約</button>
+            <div class="guild-header">
+                <span id="guild-icon-slot"></span>
+                <h1 id="guild-name"></h1>
             </div>
-            <h2 style="margin-top: 20px;">クレジットを追加購入</h2>
-            <div class="row" id="topup-packs"></div>
 
-            <h2 style="margin-top: 20px;">履歴</h2>
-            <table id="transactions"></table>
+            <div id="status" class="callout"></div>
+
+            <div class="summary">
+                <p class="label">クレジット残高</p>
+                <p id="credits" class="credits"></p>
+                <dl class="key-value">
+                    <dt>文字起こし</dt>
+                    <dd id="estimate-transcription"></dd>
+                    <dt>読み上げ</dt>
+                    <dd id="estimate-speech"></dd>
+                </dl>
+                <p class="helper-text">目安です。どちらか一方だけを使った場合の量で、両方使うと合計で消費されます。</p>
+            </div>
+
+            <div class="tabs" role="tablist" aria-label="メニュー">
+                <button class="tab-item active" role="tab" id="tab-plans" aria-controls="panel-plans" aria-selected="true" type="button" data-panel="plans">月額プラン</button>
+                <button class="tab-item" role="tab" id="tab-topup" aria-controls="panel-topup" aria-selected="false" type="button" data-panel="topup">追加購入</button>
+                <button class="tab-item" role="tab" id="tab-history" aria-controls="panel-history" aria-selected="false" type="button" data-panel="history">履歴</button>
+            </div>
+
+            <div id="panel-plans" role="tabpanel" aria-labelledby="tab-plans">
+                <p class="helper-text">毎月クレジットが付与されます。使い切れなかった分は翌月に繰り越されます。</p>
+                <dl id="subscription-info" class="key-value info" hidden></dl>
+                <div id="plans" class="cards"></div>
+                <p class="helper-text">プランの変更は、次回の更新日から反映されます。解約や支払い方法の変更は「支払いの管理」から行えます。</p>
+            </div>
+
+            <div id="panel-topup" role="tabpanel" aria-labelledby="tab-topup" hidden>
+                <p class="helper-text">必要なときに、必要な分だけ追加できます。残高に期限はありません。</p>
+                <div id="packs" class="cards"></div>
+            </div>
+
+            <div id="panel-history" role="tabpanel" aria-labelledby="tab-history" hidden>
+                <table class="table" id="history">
+                    <thead>
+                        <tr>
+                            <th>日時</th>
+                            <th>内容</th>
+                            <th class="num">増減</th>
+                            <th class="num">残高</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body"></tbody>
+                </table>
+                <p id="history-empty" class="helper-text" hidden>まだ履歴がありません。</p>
+            </div>
+
+            <div class="footer-actions">
+                <button id="portal" class="button secondary" type="button">支払いの管理</button>
+            </div>
         </section>
     </main>
+
+    <dialog id="confirm" class="dialog modal">
+        <form method="dialog">
+            <h2 id="confirm-title"></h2>
+            <p id="confirm-message"></p>
+            <div class="dialog-actions">
+                <button class="button tertiary" value="cancel">キャンセル</button>
+                <button class="button" value="ok">変更する</button>
+            </div>
+        </form>
+    </dialog>
 
     <script src="/dashboard/dashboard.js"></script>
 </body>
