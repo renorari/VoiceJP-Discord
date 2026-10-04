@@ -2,12 +2,12 @@
 
 import express from "express";
 
-import { getEngineSettings, isEngine, updateEngineSettings } from "../../billing/settings.ts";
+import { getEngineSettings, isEngine, updateEngineSettings } from "#billing/settings.ts";
 import requireSession from "../middlewares/auth.ts";
 import { HttpError } from "../middlewares/error.ts";
 import requireGuildManager from "../middlewares/guild.ts";
 
-import type { EngineSettings } from "../../billing/settings.ts";
+import type { EngineSettings } from "#billing/settings.ts";
 
 const SETTING_KEYS = ["synthesisEngine", "recognitionEngine"] as const;
 

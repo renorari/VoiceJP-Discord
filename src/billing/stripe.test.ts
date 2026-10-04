@@ -1,6 +1,6 @@
 // Stripe checkout parameters with a fake Stripe API (requires TEST_DATABASE_URL)
 
-import { skip } from "../db/database-fixture.ts";
+import { skip } from "#testing/database.ts";
 
 import assert from "node:assert/strict";
 import { after, mock, test } from "node:test";
@@ -10,7 +10,7 @@ import { SUBSCRIPTION_PLANS } from "./constants.ts";
 
 const guildId = `test-${Date.now()}-checkout`;
 
-const { default: prisma } = await import("../db/prisma.ts");
+const { default: prisma } = await import("#lib/prisma.ts");
 const { default: stripe, changeSubscriptionPlan, createSubscriptionCheckout, planIdFromProduct } = await import("./stripe.ts");
 
 const missing = new Stripe.errors.StripeInvalidRequestError({ "type": "invalid_request_error", "code": "resource_missing", "message": "No such product" });

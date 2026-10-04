@@ -1,13 +1,14 @@
 // Subscriber check (recording is a subscriber benefit)
 
-import log from "#utils/logger.ts";
-import prisma from "../db/prisma.ts";
+import { isDatabaseConfigured } from "#lib/config.ts";
+import log from "#lib/logger.ts";
+import prisma from "#lib/prisma.ts";
 import { ACTIVE_SUBSCRIPTION_STATUSES } from "./constants.ts";
 
 const logger = log.getLogger("billing");
 
 export default async function isSubscribed(guildId: string) {
-    if (!process.env.DATABASE_URL) return false;
+    if (!isDatabaseConfigured()) return false;
 
     try {
         const billing = await prisma.guildBilling.findUnique({ "where": { guildId } });

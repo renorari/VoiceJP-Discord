@@ -1,14 +1,13 @@
 // Stripe client and checkout sessions
 
+import { dashboardUrl } from "#lib/config.ts";
 import Stripe from "stripe";
 
-import prisma from "../db/prisma.ts";
+import prisma from "#lib/prisma.ts";
 import { SUBSCRIPTION_PLANS, TOPUP_PACKS } from "./constants.ts";
 
 import type { SubscriptionPlanId, TopupPackId } from "./constants.ts";
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
-const DASHBOARD_URL = `${BASE_URL}/dashboard/`;
 const PLAN_PRODUCT_PREFIX = "voicejp-plan-";
 
 // キーが未設定でも起動できるようにダミーを渡す (課金 API を呼んだときに Stripe 側で認証エラーになる)
@@ -76,8 +75,8 @@ export async function createSubscriptionCheckout(guildId: string, plan: Subscrip
         "customer": await ensureCustomer(guildId),
         "line_items": [{ "price_data": await planPrice(plan), "quantity": 1 }],
         "metadata": { guildId, plan },
-        "success_url": `${DASHBOARD_URL}?guild=${guildId}&checkout=success`,
-        "cancel_url": `${DASHBOARD_URL}?guild=${guildId}&checkout=cancel`
+        "success_url": dashboardUrl({ "guild": guildId, "checkout": "success" }),
+        "cancel_url": dashboardUrl({ "guild": guildId, "checkout": "cancel" })
     });
 
     return session.url;
@@ -107,8 +106,8 @@ export async function createTopupCheckout(guildId: string, pack: TopupPackId) {
             "quantity": 1
         }],
         "metadata": { guildId, pack },
-        "success_url": `${DASHBOARD_URL}?guild=${guildId}&checkout=success`,
-        "cancel_url": `${DASHBOARD_URL}?guild=${guildId}&checkout=cancel`
+        "success_url": dashboardUrl({ "guild": guildId, "checkout": "success" }),
+        "cancel_url": dashboardUrl({ "guild": guildId, "checkout": "cancel" })
     });
 
     return session.url;
@@ -117,7 +116,7 @@ export async function createTopupCheckout(guildId: string, pack: TopupPackId) {
 export async function createPortalSession(guildId: string) {
     const session = await stripe.billingPortal.sessions.create({
         "customer": await ensureCustomer(guildId),
-        "return_url": `${DASHBOARD_URL}?guild=${guildId}`
+        "return_url": dashboardUrl({ "guild": guildId })
     });
 
     return session.url;

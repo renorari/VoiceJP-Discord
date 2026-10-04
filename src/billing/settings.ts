@@ -1,9 +1,10 @@
 // Which engine a server wants for read-aloud and speech recognition
 
-import log from "#utils/logger.ts";
-import prisma from "../db/prisma.ts";
+import { isDatabaseConfigured } from "#lib/config.ts";
+import log from "#lib/logger.ts";
+import prisma from "#lib/prisma.ts";
 
-import type { SpeechEngine } from "../generated/prisma/client.ts";
+import type { SpeechEngine } from "#generated/prisma/client.ts";
 
 export interface EngineSettings {
     synthesisEngine: SpeechEngine;
@@ -26,7 +27,7 @@ export async function getEngineSettings(guildId: string): Promise<EngineSettings
     const cached = cache.get(guildId);
     if (cached && cached.expiresAt > Date.now()) return cached.settings;
 
-    if (!process.env.DATABASE_URL) return DEFAULT_SETTINGS;
+    if (!isDatabaseConfigured()) return DEFAULT_SETTINGS;
 
     try {
         const saved = await prisma.guildSettings.findUnique({ "where": { guildId } });

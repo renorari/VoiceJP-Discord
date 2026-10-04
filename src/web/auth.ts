@@ -1,11 +1,11 @@
 // Better Auth (Discord login)
 
+import { BASE_URL } from "#lib/config.ts";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 
-import prisma from "../db/prisma.ts";
+import prisma from "#lib/prisma.ts";
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 // identify と email は標準で付くので、サーバー一覧のために guilds だけ足す
 const DISCORD_SCOPES = ["guilds"];
 

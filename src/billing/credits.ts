@@ -1,10 +1,10 @@
 // Per-guild credit balance and ledger
 
-import prisma from "../db/prisma.ts";
-import { Prisma } from "../generated/prisma/client.ts";
+import prisma from "#lib/prisma.ts";
+import { Prisma } from "#generated/prisma/client.ts";
 import { SPEECH_CREDITS_PER_100_CHARACTERS, TRANSCRIPTION_CREDITS_PER_MINUTE } from "./constants.ts";
 
-import type { CreditTransactionType } from "../generated/prisma/client.ts";
+import type { CreditTransactionType } from "#generated/prisma/client.ts";
 
 interface GrantOptions {
     guildId: string;

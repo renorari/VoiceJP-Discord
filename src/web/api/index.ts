@@ -3,8 +3,8 @@
 import express from "express";
 
 import requireSession from "../middlewares/auth.ts";
-import summarizeGuilds from "../utils/guild-summary.ts";
-import { fetchManageableGuilds } from "../utils/guilds.ts";
+import summarizeGuilds from "../guilds/summary.ts";
+import { fetchManageableGuilds } from "../guilds/manageable.ts";
 import billingRouter from "./billing.ts";
 import recordingsRouter from "./recordings.ts";
 import settingsRouter from "./settings.ts";

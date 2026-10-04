@@ -1,6 +1,6 @@
 // Stripe sync tests with a fake Stripe API (requires TEST_DATABASE_URL)
 
-import { skip } from "../db/database-fixture.ts";
+import { skip } from "#testing/database.ts";
 
 import assert from "node:assert/strict";
 import { after, before, mock, test } from "node:test";
@@ -16,7 +16,7 @@ function invoice(id: string, billingReason: string, plan: string) {
     return { id, customer, "billing_reason": billingReason, "lines": { "data": [{ "pricing": { "price_details": { "product": `voicejp-plan-${plan}` } } }] } };
 }
 
-const { default: prisma } = await import("../db/prisma.ts");
+const { default: prisma } = await import("#lib/prisma.ts");
 const { default: stripe } = await import("./stripe.ts");
 const { syncDueSubscriptions, syncGuildBilling } = await import("./stripe-sync.ts");
 

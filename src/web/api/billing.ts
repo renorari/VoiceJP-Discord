@@ -2,15 +2,15 @@
 
 import express from "express";
 
-import { ACTIVE_SUBSCRIPTION_STATUSES, CREDITS_PER_YEN, SPEECH_CREDITS_PER_100_CHARACTERS, SUBSCRIPTION_PLANS, TOPUP_PACKS, TRANSCRIPTION_CREDITS_PER_MINUTE } from "../../billing/constants.ts";
-import { changeSubscriptionPlan, createPortalSession, createSubscriptionCheckout, createTopupCheckout, isPlanId } from "../../billing/stripe.ts";
-import { syncGuildBilling } from "../../billing/stripe-sync.ts";
-import prisma from "../../db/prisma.ts";
+import { ACTIVE_SUBSCRIPTION_STATUSES, CREDITS_PER_YEN, SPEECH_CREDITS_PER_100_CHARACTERS, SUBSCRIPTION_PLANS, TOPUP_PACKS, TRANSCRIPTION_CREDITS_PER_MINUTE } from "#billing/constants.ts";
+import { changeSubscriptionPlan, createPortalSession, createSubscriptionCheckout, createTopupCheckout, isPlanId } from "#billing/stripe.ts";
+import { syncGuildBilling } from "#billing/stripe-sync.ts";
+import prisma from "#lib/prisma.ts";
 import requireSession from "../middlewares/auth.ts";
 import { HttpError } from "../middlewares/error.ts";
 import requireGuildManager from "../middlewares/guild.ts";
 
-import type { TopupPackId } from "../../billing/constants.ts";
+import type { TopupPackId } from "#billing/constants.ts";
 
 const TRANSACTION_LIMIT = 20;
 const SYNC_COOLDOWN = 15 * 1000;

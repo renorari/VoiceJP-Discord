@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 
-import { RETENTION_DAYS } from "../../recordings/constants.ts";
+import { RETENTION_DAYS } from "#recordings/constants.ts";
 import renderPrivacyPage from "./privacy.ts";
 
 const OPERATOR_KEYS = ["OPERATOR_NAME", "OPERATOR_EMAIL"];

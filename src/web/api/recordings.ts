@@ -3,15 +3,15 @@
 import express from "express";
 import path from "node:path";
 
-import { deleteRecording } from "../../recordings/cleanup.ts";
-import { RECORDINGS_DIR } from "../../recordings/constants.ts";
-import { formatTranscript } from "../../recordings/transcript.ts";
-import prisma from "../../db/prisma.ts";
+import { deleteRecording } from "#recordings/cleanup.ts";
+import { RECORDINGS_DIR } from "#recordings/constants.ts";
+import { formatTranscript } from "#recordings/transcript.ts";
+import prisma from "#lib/prisma.ts";
 import requireSession from "../middlewares/auth.ts";
 import { HttpError } from "../middlewares/error.ts";
 import requireGuildManager from "../middlewares/guild.ts";
 
-import type { TranscriptEntry } from "../../recordings/recorder.ts";
+import type { TranscriptEntry } from "#recordings/recorder.ts";
 
 const LIST_LIMIT = 50;
 const ID_PATTERN = /^[a-z0-9]+$/;

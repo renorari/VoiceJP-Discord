@@ -1,7 +1,7 @@
 // 特定商取引法に基づく表記
 // 運営者の情報は環境変数から読み込む (OSS なので、個人情報をリポジトリに入れないため)
 
-import { SUBSCRIPTION_PLANS, TOPUP_PACKS } from "../../billing/constants.ts";
+import { SUBSCRIPTION_PLANS, TOPUP_PACKS } from "#billing/constants.ts";
 import { escapeHtml, operatorEnv, renderPage } from "./layout.ts";
 
 const DISCORD_SUPPORT_URL = "https://discord.gg/ahd4aVgxeb";

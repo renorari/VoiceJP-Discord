@@ -1,0 +1,333 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+}
+
+main {
+    flex: 1;
+    height: 100%;
+}
+
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.button {
+    display: inline-block;
+    margin: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-small);
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.button-primary {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+.bold {
+    font-weight: bolder;
+}
+
+.big {
+    font-size: 1.25em;
+}
+
+h2.big {
+    font-size: 2rem;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+h1>a {
+    color: var(--color-on-primary);
+    text-decoration: none;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 100vh;
+    padding: 2rem;
+    background: var(--color-overlay);
+    color: var(--color-on-overlay);
+}
+
+header::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("/assets/images/header-960.webp");
+    background-position: center;
+    background-size: cover;
+}
+
+header #header-content {
+    width: 100%;
+    max-width: 64rem;
+}
+
+header .button-primary,
+section:last-child .button-primary {
+    margin-top: 1rem;
+    background: var(--color-on-overlay);
+    border-color: transparent;
+    color: var(--color-on-overlay-inverse);
+}
+
+header .button-secondary,
+section:last-child .button-secondary {
+    margin-top: 1rem;
+    background: transparent;
+    border-color: var(--color-on-overlay);
+    color: var(--color-on-overlay);
+}
+
+section {
+    padding: 2rem;
+    text-align: center;
+}
+
+.section-head {
+    width: 100%;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+section:first-child {
+    background-color: var(--color-surface-alt);
+}
+
+.cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+    gap: 1rem;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    min-height: 8rem;
+    padding: 1rem;
+    background-color: var(--color-surface);
+    border-radius: var(--radius);
+    text-align: center;
+}
+
+.card img {
+    display: inline-block;
+    width: 3rem;
+    height: 3rem;
+}
+
+.card-2 {
+    width: calc(50% - 1rem);
+    min-width: 20rem;
+}
+
+.card-3 {
+    width: calc(33.333% - 1rem);
+    min-width: 20rem;
+}
+
+.card.arrow-down {
+    margin-bottom: 2rem;
+}
+
+.card.arrow-down::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2rem;
+    height: 2rem;
+    background: url("/assets/icons/arrow-down.svg") no-repeat;
+    background-size: contain;
+}
+
+section:last-child {
+    position: relative;
+    background: var(--color-overlay);
+    color: var(--color-on-overlay);
+}
+
+section:last-child::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("/assets/images/invite-background-960.webp");
+    background-position: center;
+    background-size: cover;
+}
+
+ul {
+    padding-right: inherit;
+    padding-left: inherit;
+}
+
+@media screen and (max-width: 20rem) {
+    .card-2,
+    .card-3 {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+/* 大きい画面では高解像度の背景画像を使う (小さい画面では軽い画像のまま) */
+@media (min-width: 961px) {
+    header::before {
+        background-image: url("/assets/images/header-1920.webp");
+    }
+
+    section:last-child::before {
+        background-image: url("/assets/images/invite-background-1920.webp");
+    }
+}
+
+/* 規約・ポリシーなどの長い文書 */
+.prose {
+    max-width: 60rem;
+    margin-inline: auto;
+}
+
+.prose h2 {
+    margin: 2rem 0 0.5rem;
+    font-size: 1.25rem;
+}
+
+.prose h2:first-child {
+    margin-top: 0;
+}
+
+.prose p,
+.prose ul {
+    margin: 0.5rem 0;
+}
+
+.prose ul {
+    padding-left: 1.5rem;
+}
+
+.prose li + li {
+    margin-top: 0.25rem;
+}
+
+/* 特定商取引法に基づく表記 */
+.legal {
+    display: grid;
+    grid-template-columns: minmax(8rem, 14rem) 1fr;
+    gap: 0;
+    margin: 0;
+}
+
+.legal dt,
+.legal dd {
+    margin: 0;
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.legal dt {
+    font-weight: bold;
+}
+
+.legal ul {
+    margin: 0 0 0.5rem;
+    padding-left: 1.25rem;
+}
+
+@media (max-width: 640px) {
+    .legal {
+        grid-template-columns: 1fr;
+    }
+
+    .legal dt {
+        padding-bottom: 0;
+        border-bottom: 0;
+    }
+}
+
+/* 料金プラン */
+.plans {
+    margin-block: 1rem;
+}
+
+.plans-title {
+    margin: 1.5rem 0 0.5rem;
+    font-size: 1rem;
+}
+
+.plans .card {
+    text-align: left;
+}
+
+.plans .price {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.plans .detail {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.note {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        scroll-behavior: auto !important;
+    }
+}
+
+.button:hover {
+    opacity: 0.85;
+}
+
+a:focus-visible,
+.button:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}

@@ -1,6 +1,6 @@
 // Paid engine gating and usage charging (requires TEST_DATABASE_URL)
 
-import { skip } from "../db/database-fixture.ts";
+import { skip } from "#testing/database.ts";
 
 import assert from "node:assert/strict";
 import { after, test } from "node:test";
@@ -11,7 +11,7 @@ const guildId = `test-${Date.now()}-usage`;
 const INITIAL_CREDITS = 100;
 
 process.env.OPENAI_API_KEY = "sk-test";
-const { default: prisma } = await import("../db/prisma.ts");
+const { default: prisma } = await import("#lib/prisma.ts");
 const { chargeSpeech, chargeTranscription, hasCredits, shouldUsePlus } = await import("./usage.ts");
 const { updateEngineSettings } = await import("./settings.ts");
 

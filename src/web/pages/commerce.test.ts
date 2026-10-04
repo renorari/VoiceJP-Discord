@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 
-import { SUBSCRIPTION_PLANS, TOPUP_PACKS } from "../../billing/constants.ts";
+import { SUBSCRIPTION_PLANS, TOPUP_PACKS } from "#billing/constants.ts";
 import renderCommercePage from "./commerce.ts";
 
 const OPERATOR_KEYS = ["OPERATOR_NAME", "OPERATOR_ADDRESS", "OPERATOR_PHONE", "OPERATOR_EMAIL", "OPERATOR_INVOICE_NUMBER"];

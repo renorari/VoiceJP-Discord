@@ -1,5 +1,13 @@
 // Shared layout for server-rendered pages (the static pages in public/ use the same footer)
 
+import fs from "node:fs";
+import path from "node:path";
+
+const CONTENT_DIR = path.join(import.meta.dirname, "content");
+const ANALYTICS_HEAD = `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1265980632516511"
+        crossorigin="anonymous"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VLSW5SRFC0"></script>`;
+
 const ESCAPES: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" };
 
 export const FOOTER_HTML = `<footer>
@@ -27,6 +35,16 @@ export function operatorEnv(name: string) {
     return process.env[name]?.trim() || undefined;
 }
 
+// content/ の HTML の {{key}} を差し込む (値は HTML として扱うので、利用者の入力は escapeHtml してから渡す)
+export function renderContent(name: string, values: Record<string, string | number> = {}) {
+    const template = fs.readFileSync(path.join(CONTENT_DIR, `${name}.html`), "utf8");
+
+    return template.replace(/\{\{(\w+)\}\}/g, (match, key: string) => {
+        if (!(key in values)) throw new Error(`Missing value for {{${key}}} in ${name}.html`);
+        return String(values[key]);
+    });
+}
+
 interface PageOptions {
     title: string;
     description: string;
@@ -49,8 +67,9 @@ export function renderPage({ title, description, path, body }: PageOptions) {
     <link rel="canonical" href="https://voicejp.renorari.net${path}" />
     <title>${escapeHtml(title)} | VoiceJP</title>
     <link rel="icon" href="/favicon.ico">
-    <link rel="stylesheet" href="/styles/theme.css">
-    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/assets/css/theme.css">
+    <link rel="stylesheet" href="/assets/css/site.css">
+    ${ANALYTICS_HEAD}
 </head>
 
 <body>

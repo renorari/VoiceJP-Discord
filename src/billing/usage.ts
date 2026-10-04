@@ -1,17 +1,16 @@
 // Decide whether a guild can use the paid (OpenAI) engines and charge for usage
 
-import log from "#utils/logger.ts";
-import { IS_OPENAI_CONFIGURED } from "#utils/openai.ts";
+import { isDatabaseConfigured } from "#lib/config.ts";
+import log from "#lib/logger.ts";
+import { IS_OPENAI_CONFIGURED } from "#speech/openai.ts";
 import { consumeCredits, getBalance, speechCost, transcriptionCost } from "./credits.ts";
 import { getEngineSettings } from "./settings.ts";
-
-const IS_DATABASE_CONFIGURED = Boolean(process.env.DATABASE_URL);
 
 const logger = log.getLogger("billing");
 
 // 課金機能が未設定、またはDBに繋がらないときは、無料のエンジンを使う
 export async function hasCredits(guildId: string) {
-    if (!IS_OPENAI_CONFIGURED || !IS_DATABASE_CONFIGURED) return false;
+    if (!IS_OPENAI_CONFIGURED || !isDatabaseConfigured()) return false;
 
     try {
         return await getBalance(guildId) > 0;

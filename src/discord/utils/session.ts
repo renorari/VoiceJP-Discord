@@ -1,6 +1,6 @@
 // Tear down every per-guild voice state
 
-import log from "#utils/logger.ts";
+import log from "#lib/logger.ts";
 
 import type { State } from "../types.ts";
 

@@ -1,7 +1,7 @@
 // Require the logged-in user to manage the guild in the URL
 
 import { HttpError } from "./error.ts";
-import { assertCanManageGuild } from "../utils/guilds.ts";
+import { assertCanManageGuild } from "../guilds/manageable.ts";
 
 import type { NextFunction, Request, Response } from "express";
 

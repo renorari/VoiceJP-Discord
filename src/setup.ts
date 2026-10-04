@@ -2,9 +2,9 @@
 
 import "dotenv/config";
 
-import log from "#utils/logger.ts";
-import ensureVoiceModel from "#utils/voice-model.ts";
-import ensureVoskModel from "#utils/vosk-model.ts";
+import log from "./lib/logger.ts";
+import ensureVoiceModel from "./speech/models/open-jtalk.ts";
+import ensureVoskModel from "./speech/models/vosk.ts";
 
 const logger = log.getLogger("setup");
 

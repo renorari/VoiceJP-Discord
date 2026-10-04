@@ -1,7 +1,7 @@
 // Sync payments from the Stripe API (no webhook needed)
 
-import log from "#utils/logger.ts";
-import prisma from "../db/prisma.ts";
+import log from "#lib/logger.ts";
+import prisma from "#lib/prisma.ts";
 import { ACTIVE_SUBSCRIPTION_STATUSES, SUBSCRIPTION_PLANS, TOPUP_PACKS } from "./constants.ts";
 import { grantCredits } from "./credits.ts";
 import stripe, { planIdFromProduct } from "./stripe.ts";

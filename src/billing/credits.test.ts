@@ -1,6 +1,6 @@
 // Credit ledger tests (requires TEST_DATABASE_URL)
 
-import { skip } from "../db/database-fixture.ts";
+import { skip } from "#testing/database.ts";
 
 import assert from "node:assert/strict";
 import { after, test } from "node:test";
@@ -10,7 +10,7 @@ import { consumeCredits, getBalance, grantCredits, speechCost, transcriptionCost
 
 const guildId = `test-${Date.now()}`;
 
-const { default: prisma } = await import("../db/prisma.ts");
+const { default: prisma } = await import("#lib/prisma.ts");
 
 after(async () => {
     if (skip) return;

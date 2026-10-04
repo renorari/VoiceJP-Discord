@@ -2,8 +2,8 @@
 
 import type { AudioPlayer, AudioReceiveStream, VoiceConnection } from "@discordjs/voice";
 import type { ChatInputCommandInteraction, GuildMember, Webhook } from "discord.js";
-import type ActiveRecording from "../recordings/recorder.ts";
-import type { MemberRecognitionDataMap } from "./utils/recognition.ts";
+import type ActiveRecording from "#recordings/recorder.ts";
+import type { MemberRecognitionDataMap } from "./utils/recognition-maps.ts";
 
 export interface Connection {
     guildId: string;

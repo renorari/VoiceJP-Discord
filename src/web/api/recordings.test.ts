@@ -1,6 +1,6 @@
 // Recordings API with a stubbed login (requires TEST_DATABASE_URL)
 
-import { skip } from "../../db/database-fixture.ts";
+import { skip } from "#testing/database.ts";
 
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
@@ -16,12 +16,12 @@ const otherGuildId = "223456789012345678";
 const MANAGE_GUILD = "32";
 
 process.env.RECORDINGS_DIR = await fs.mkdtemp(path.join(os.tmpdir(), "voicejp-api-"));
-const { default: prisma } = await import("../../db/prisma.ts");
+const { default: prisma } = await import("#lib/prisma.ts");
 const { default: auth } = await import("../auth.ts");
 const { default: recordingsRouter } = await import("./recordings.ts");
 const { errorHandler, notFoundHandler } = await import("../middlewares/error.ts");
-const { fetchManageableGuilds } = await import("../utils/guilds.ts");
-const { default: log } = await import("#utils/logger.ts");
+const { fetchManageableGuilds } = await import("../guilds/manageable.ts");
+const { default: log } = await import("#lib/logger.ts");
 
 let loggedIn = true;
 const originalFetch = globalThis.fetch;
