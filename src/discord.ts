@@ -1,3 +1,5 @@
+// VoiceJP Discord
+
 import "dotenv/config";
 
 import { Client, Events, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from "discord.js";
