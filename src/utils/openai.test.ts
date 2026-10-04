@@ -51,6 +51,6 @@ test("読み上げた音声をファイルに保存してパスを返す", async
     const request = requests.find(item => item.url === "/v1/audio/speech");
     const body = JSON.parse(Buffer.from(request?.body ?? "", "latin1").toString("utf8"));
     assert.equal(body.input, "こんにちは");
-    assert.equal(body.model, "gpt-4o-mini-tts");
+    assert.equal(body.model, "tts-1");
     assert.equal(body.response_format, "wav");
 });

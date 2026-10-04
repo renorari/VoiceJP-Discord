@@ -8,7 +8,7 @@ import { createTempWavPath } from "#utils/speech.ts";
 
 const LANGUAGE = "ja";
 const TRANSCRIPTION_MODEL = process.env.OPENAI_TRANSCRIPTION_MODEL || "gpt-4o-mini-transcribe";
-const SPEECH_MODEL = process.env.OPENAI_SPEECH_MODEL || "gpt-4o-mini-tts";
+const SPEECH_MODEL = process.env.OPENAI_SPEECH_MODEL || "tts-1";
 const SPEECH_VOICE = process.env.OPENAI_SPEECH_VOICE || "alloy";
 
 export const IS_OPENAI_CONFIGURED = Boolean(process.env.OPENAI_API_KEY);
