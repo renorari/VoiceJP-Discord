@@ -1,37 +1,23 @@
-/* Apple HIG を参考にした見た目 (sashimi UI の変数を上書きして調整) */
+/* Apple HIG を参考にした画面。色・フォントは /styles/theme.css の共通定義を使う */
 
 :root {
-    --sui-color-key-primary: #0071e3;
-    --sui-color-on-key-primary: #fff;
-    --sui-color-key-tertiary: #e5f0fd;
-    --sui-roundness-normal: 12px;
-    --sui-roundness-strong: 12px;
-    --sui-button-height: 44px;
-    --sui-input-base-height: 44px;
-
-    --background: var(--sui-color-highlight-secondary);
-    --grouped: var(--sui-color-surface);
-    --separator: var(--sui-color-outline-secondary);
-
-    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Segoe UI", sans-serif;
-    -webkit-font-smoothing: antialiased;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --sui-color-key-primary: #2997ff;
-        --sui-color-on-key-primary: #000;
-        --sui-color-key-tertiary: #14263d;
-        --background: #000;
-        --grouped: #1c1c1e;
-        --separator: #38383a;
-    }
+    --background: var(--color-bg);
+    --grouped: var(--color-surface);
+    --separator: var(--color-border);
 }
 
 body {
+    display: flex;
+    flex-direction: column;
     min-height: 100vh;
-    padding: 0 0 max(48px, env(safe-area-inset-bottom));
+    padding: 0;
     background: var(--background);
+}
+
+.container {
+    flex: 1;
+    width: 100%;
+    padding-bottom: max(48px, env(safe-area-inset-bottom));
 }
 
 [hidden] {
@@ -155,7 +141,7 @@ hgroup p {
 .container {
     max-width: 640px;
     margin: 0 auto;
-    padding: 0 16px;
+    padding-inline: 16px;
 }
 
 .view {

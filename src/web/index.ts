@@ -16,6 +16,7 @@ import auth from "./auth.ts";
 import { errorHandler, notFoundHandler } from "./middlewares/error.ts";
 import logMiddleware from "./middlewares/log.ts";
 import renderCommercePage from "./pages/commerce.ts";
+import renderPrivacyPage from "./pages/privacy.ts";
 
 const PUBLIC_DIR = "public";
 const SASHIMI_UI_DIR = "node_modules/sashimi-ui/dist/css";
@@ -62,6 +63,11 @@ app.use(express.urlencoded({ "extended": true }));
 app.get("/tokushoho.html", (req, res) => {
     res.setHeader("Cache-Control", "no-cache");
     res.type("html").send(renderCommercePage());
+});
+
+app.get("/privacy.html", (req, res) => {
+    res.setHeader("Cache-Control", "no-cache");
+    res.type("html").send(renderPrivacyPage());
 });
 
 app.use("/vendor/sashimi-ui", express.static(SASHIMI_UI_DIR));

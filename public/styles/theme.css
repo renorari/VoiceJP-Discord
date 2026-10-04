@@ -1,0 +1,115 @@
+/* VoiceJP 共通のデザイン定義 (サイト・ダッシュボードの色とフォントはすべてここから決まる) */
+
+:root {
+    color-scheme: light dark;
+
+    --font-sans: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", "Yu Gothic", Meiryo, "Segoe UI", sans-serif;
+
+    --color-bg: #f3f1ef;
+    --color-surface: #fff;
+    --color-surface-alt: #e8edf5;
+    --color-text: #2e2823;
+    --color-text-muted: #6d645c;
+    --color-border: #ddd6cf;
+    --color-primary: #2f4673;
+    --color-on-primary: #fff;
+    --color-primary-soft: #dfe7f5;
+    --color-accent: #a68053;
+    --color-footer-bg: #403c39;
+    --color-footer-text: #fff;
+    --color-success: #00a846;
+    --color-warning: #d18b00;
+    --color-error: #ff4b6c;
+
+    /* 写真の上に重ねる部分 (トップの大きな画像など)。明るい・暗いに関わらず同じ */
+    --color-overlay: rgba(0, 0, 0, 0.25);
+    --color-on-overlay: #fff;
+    --color-on-overlay-inverse: #000;
+
+    --radius: 12px;
+    --radius-small: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-bg: #141210;
+        --color-surface: #1f1c1a;
+        --color-surface-alt: #1a2233;
+        --color-text: #f0ece8;
+        --color-text-muted: #a59c94;
+        --color-border: #3a3631;
+        --color-primary: #8fb1ec;
+        --color-on-primary: #0b1220;
+        --color-primary-soft: #1d2a40;
+        --color-accent: #c9a475;
+        --color-footer-bg: #0c0b0a;
+        --color-success: #34c759;
+        --color-warning: #ffd60a;
+        --color-error: #ff453a;
+    }
+}
+
+/* sashimi UI (ダッシュボード) の色も、同じ定義から決める。読み込む順番は sashimi の後 */
+:root {
+    --sui-color-neutral-primary: var(--color-text);
+    --sui-color-neutral-secondary: var(--color-text-muted);
+    --sui-color-neutral-tertiary: var(--color-border);
+    --sui-color-on-neutral-tertiary: var(--color-text-muted);
+    --sui-color-key-primary: var(--color-primary);
+    --sui-color-on-key-primary: var(--color-on-primary);
+    --sui-color-key-secondary: var(--color-primary);
+    --sui-color-key-tertiary: var(--color-primary-soft);
+    --sui-color-outline-primary: var(--color-border);
+    --sui-color-outline-secondary: var(--color-border);
+    --sui-color-highlight-primary: var(--color-border);
+    --sui-color-highlight-secondary: var(--color-bg);
+    --sui-color-surface: var(--color-surface);
+    --sui-color-disabled-fill: var(--color-bg);
+    --sui-color-success: var(--color-success);
+    --sui-color-warning: var(--color-warning);
+    --sui-color-error: var(--color-error);
+    --sui-roundness-normal: var(--radius);
+    --sui-roundness-strong: var(--radius);
+    --sui-button-height: 44px;
+    --sui-input-base-height: 44px;
+}
+
+body {
+    font-family: var(--font-sans);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* 全ページ共通のフッター */
+footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 2rem;
+    padding: 1.25rem max(1rem, env(safe-area-inset-left));
+    background: var(--color-footer-bg);
+    font-size: 0.875rem;
+    color: var(--color-footer-text);
+}
+
+footer a {
+    color: var(--color-footer-text);
+    text-decoration: none;
+    opacity: 0.85;
+}
+
+footer a:hover,
+footer a:focus-visible {
+    text-decoration: underline;
+    opacity: 1;
+}
+
+footer ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}

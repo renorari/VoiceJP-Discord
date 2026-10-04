@@ -2,15 +2,10 @@
 // 運営者の情報は環境変数から読み込む (OSS なので、個人情報をリポジトリに入れないため)
 
 import { SUBSCRIPTION_PLANS, TOPUP_PACKS } from "../../billing/constants.ts";
+import { escapeHtml, operatorEnv, renderPage } from "./layout.ts";
 
 const DISCORD_SUPPORT_URL = "https://discord.gg/ahd4aVgxeb";
 const UNDISCLOSED = "請求があった場合には、購入のお申し込み前に十分な時間的余裕をもって、遅滞なく電子メールでお知らせします。";
-
-const ESCAPES: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" };
-
-function escapeHtml(value: string) {
-    return value.replace(/[&<>"']/g, character => ESCAPES[character]);
-}
 
 function yen(value: number) {
     return `${value.toLocaleString("ja-JP")}円`;
@@ -18,7 +13,7 @@ function yen(value: number) {
 
 // 設定されていれば表示し、なければ「請求があれば開示する」と表示する
 function operatorValue(name: string) {
-    const value = process.env[name]?.trim();
+    const value = operatorEnv(name);
     return value ? escapeHtml(value) : UNDISCLOSED;
 }
 
@@ -32,8 +27,8 @@ function priceList() {
 }
 
 function rows() {
-    const email = process.env.OPERATOR_EMAIL?.trim();
-    const invoiceNumber = process.env.OPERATOR_INVOICE_NUMBER?.trim();
+    const email = operatorEnv("OPERATOR_EMAIL");
+    const invoiceNumber = operatorEnv("OPERATOR_INVOICE_NUMBER");
     const contact = [
         email ? `<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>` : "",
         `Discordサーバー「<a href="${DISCORD_SUPPORT_URL}">JuicyServer</a>」内の運営チャンネル`
@@ -64,64 +59,17 @@ function rows() {
 }
 
 export default function renderCommercePage() {
-    const isConfigured = Boolean(process.env.OPERATOR_NAME?.trim());
-    const developmentNote = process.env.NODE_ENV !== "production" && !isConfigured
+    const developmentNote = process.env.NODE_ENV !== "production" && !operatorEnv("OPERATOR_NAME")
         ? "<p class=\"note\">(開発環境の表示) 運営者の環境変数 (OPERATOR_NAME など) が未設定のため、請求時に開示する旨の文言を表示しています。</p>"
         : "";
 
-    return `<!DOCTYPE html>
-<html lang="ja">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:title" content="特定商取引法に基づく表記 | VoiceJP">
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="VoiceJP">
-    <meta name="description" content="VoiceJP+ の特定商取引法に基づく表記です">
-    <link rel="canonical" href="https://voicejp.renorari.net/tokushoho.html" />
-    <title>特定商取引法に基づく表記 | VoiceJP</title>
-    <link rel="icon" href="/favicon.ico">
-    <link rel="stylesheet" href="/styles/main.css">
-</head>
-
-<body>
-    <nav>
-        <h1><a href="/">VoiceJP</a> 特定商取引法に基づく表記</h1>
-    </nav>
-
-    <main>
-        <section style="text-align: start;">
-            ${developmentNote}
+    return renderPage({
+        "title": "特定商取引法に基づく表記",
+        "description": "VoiceJP+ の特定商取引法に基づく表記です",
+        "path": "/tokushoho.html",
+        "body": `${developmentNote}
             <dl class="legal">
                 ${rows().map(([label, value]) => `<dt>${label}</dt><dd>${value}</dd>`).join("\n                ")}
-            </dl>
-        </section>
-        <section>
-            <div class="section-head">
-                <h2 class="big">VoiceJPと一緒に 通話を楽しみましょう</h2>
-            </div>
-            <a href="/invite/" class="button button-primary">今すぐDiscordアプリを導入</a>
-            <a href="/dashboard/" class="button button-secondary">ダッシュボードを開く</a>
-        </section>
-    </main>
-
-    <footer>
-        <div id="footer-left">
-            &copy; 2026 VoiceJP & Renorari
-        </div>
-        <div id="footer-right">
-            <ul>
-                <li><a href="/dashboard/">Dashboard</a></li>
-                <li><a href="/terms.html">Terms of service</a></li>
-                <li><a href="/tokushoho.html">特定商取引法に基づく表記</a></li>
-                <li><a href="https://renorari.net/privacy.html">Privacy policy</a></li>
-                <li><a href="https://renorari.net/">Owner's Website</a></li>
-            </ul>
-        </div>
-    </footer>
-</body>
-
-</html>
-`;
+            </dl>`
+    });
 }
