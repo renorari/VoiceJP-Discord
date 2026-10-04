@@ -262,6 +262,41 @@ footer div {
     }
 }
 
+/* 特定商取引法に基づく表記 */
+.legal {
+    display: grid;
+    grid-template-columns: minmax(8rem, 14rem) 1fr;
+    gap: 0;
+    margin: 0;
+}
+
+.legal dt,
+.legal dd {
+    margin: 0;
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.legal dt {
+    font-weight: bold;
+}
+
+.legal ul {
+    margin: 0 0 0.5rem;
+    padding-left: 1.25rem;
+}
+
+@media (max-width: 640px) {
+    .legal {
+        grid-template-columns: 1fr;
+    }
+
+    .legal dt {
+        padding-bottom: 0;
+        border-bottom: 0;
+    }
+}
+
 /* 料金プラン */
 .plans {
     margin-block: 1rem;

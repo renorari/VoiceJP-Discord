@@ -15,6 +15,7 @@ import apiRouter from "./api/index.ts";
 import auth from "./auth.ts";
 import { errorHandler, notFoundHandler } from "./middlewares/error.ts";
 import logMiddleware from "./middlewares/log.ts";
+import renderCommercePage from "./pages/commerce.ts";
 
 const PUBLIC_DIR = "public";
 const SASHIMI_UI_DIR = "node_modules/sashimi-ui/dist/css";
@@ -56,6 +57,12 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 
 app.use(express.json());
 app.use(express.urlencoded({ "extended": true }));
+
+// 運営者の情報を環境変数から入れるので、静的なファイルではなく毎回組み立てる
+app.get("/tokushoho.html", (req, res) => {
+    res.setHeader("Cache-Control", "no-cache");
+    res.type("html").send(renderCommercePage());
+});
 
 app.use("/vendor/sashimi-ui", express.static(SASHIMI_UI_DIR));
 app.use(express.static(PUBLIC_DIR, {

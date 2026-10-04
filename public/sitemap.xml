@@ -15,6 +15,11 @@
         <priority>0.5</priority>
     </url>
     <url>
+        <loc>https://voicejp.renorari.net/tokushoho.html</loc>
+        <lastmod>2026-10-05</lastmod>
+        <priority>0.5</priority>
+    </url>
+    <url>
         <loc>https://voicejp.renorari.net/howtouse/index.html</loc>
         <lastmod>2026-10-05</lastmod>
         <priority>0.8</priority>
