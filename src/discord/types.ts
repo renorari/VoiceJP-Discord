@@ -2,6 +2,7 @@
 
 import type { AudioPlayer, AudioReceiveStream, VoiceConnection } from "@discordjs/voice";
 import type { ChatInputCommandInteraction, GuildMember, Webhook } from "discord.js";
+import type ActiveRecording from "../recordings/recorder.ts";
 import type { MemberRecognitionDataMap } from "./utils/recognition.ts";
 
 export interface Connection {
@@ -37,4 +38,5 @@ export interface State {
     connections: Map<string, Connection>;
     synthesisChannels: Map<string, SynthesisChannel>;
     recognitionChannels: Map<string, RecognitionChannel>;
+    recordings: Map<string, ActiveRecording>;
 }

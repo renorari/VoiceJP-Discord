@@ -4,6 +4,7 @@ import "dotenv/config";
 
 import { startSubscriptionSync } from "#billing/stripe-sync.ts";
 import log from "#utils/logger.ts";
+import { startRecordingCleanup } from "../recordings/cleanup.ts";
 import { toNodeHandler } from "better-auth/node";
 import compression from "compression";
 import cors from "cors";
@@ -70,6 +71,7 @@ app.use(notFoundHandler);
 app.use(errorHandler(logger));
 
 if (process.env.DATABASE_URL && process.env.STRIPE_SECRET_KEY) startSubscriptionSync();
+if (process.env.DATABASE_URL) startRecordingCleanup();
 
 app.listen(PORT, (error) => {
     if (error) {

@@ -226,3 +226,6 @@ voices/*.tmp/
 
 # Prisma generated client
 src/generated/
+
+# VoiceJP recordings
+recordings/

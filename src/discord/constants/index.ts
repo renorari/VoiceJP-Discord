@@ -48,6 +48,20 @@ export const commands = [
         .setContexts(InteractionContextType.Guild)
         .setDescription("Botをボイスチャンネルから退出させます。"),
     new SlashCommandBuilder()
+        .setName("record")
+        .setContexts(InteractionContextType.Guild)
+        .setDescription("通話の録音と自動文字起こしを行います(月額プランの特典)。")
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName("start")
+                .setDescription("録音を開始します。")
+        )
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName("stop")
+                .setDescription("録音を終了して保存します。")
+        ),
+    new SlashCommandBuilder()
         .setName("speech")
         .setContexts(InteractionContextType.Guild)
         .setDescription("音声認識と音声合成の設定を行います。")

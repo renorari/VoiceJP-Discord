@@ -8,6 +8,7 @@ import { Client, Events } from "discord.js";
 import { clientOptions, commands } from "./constants/index.ts";
 import handleJoinCommand from "./handlers/commands/join.ts";
 import handleLeaveCommand from "./handlers/commands/leave.ts";
+import { handleRecordStartCommand, handleRecordStopCommand, handleVoiceStateUpdateRecording } from "./handlers/commands/record.ts";
 import handleSpeechRecognitionCommand, {
     handleVoiceStateUpdateRecognition
 } from "./handlers/commands/speech-recognition.ts";
@@ -30,12 +31,15 @@ const client = new Client(clientOptions);
 const state: State = {
     "connections": new Map(),
     "synthesisChannels": new Map(),
-    "recognitionChannels": new RecognitionChannelMap()
+    "recognitionChannels": new RecognitionChannelMap(),
+    "recordings": new Map()
 };
 
 const guildCommandHandlers: Record<string, (interaction: ChatInputCommandInteraction<"cached">) => Promise<void>> = {
     "join": interaction => handleJoinCommand(interaction, state),
     "leave": interaction => handleLeaveCommand(interaction, state),
+    "record start": interaction => handleRecordStartCommand(client, interaction, state),
+    "record stop": interaction => handleRecordStopCommand(interaction, state),
     "speech synthesis": interaction => handleSpeechSynthesisCommand(client, interaction, state),
     "speech recognition": interaction => handleSpeechRecognitionCommand(client, interaction, state)
 };
@@ -76,6 +80,7 @@ client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
 
     try {
         await handleVoiceStateUpdateRecognition(oldState, newState, state);
+        await handleVoiceStateUpdateRecording(oldState, newState, state);
         await handleVoiceStateUpdate(newState, state);
     } catch (error) {
         logger.error(error);

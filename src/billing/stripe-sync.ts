@@ -2,14 +2,13 @@
 
 import log from "#utils/logger.ts";
 import prisma from "../db/prisma.ts";
-import { SUBSCRIPTION_PLANS, TOPUP_PACKS } from "./constants.ts";
+import { ACTIVE_SUBSCRIPTION_STATUSES, SUBSCRIPTION_PLANS, TOPUP_PACKS } from "./constants.ts";
 import { grantCredits } from "./credits.ts";
 import stripe, { planIdFromProduct } from "./stripe.ts";
 
 import type Stripe from "stripe";
 import type { TopupPackId } from "./constants.ts";
 
-const ACTIVE_SUBSCRIPTION_STATUSES = ["active", "trialing", "past_due"];
 const LIST_LIMIT = 100;
 const SYNC_INTERVAL = 10 * 60 * 1000;
 

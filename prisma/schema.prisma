@@ -66,6 +66,32 @@ model Verification {
   @@index([identifier])
 }
 
+// Recordings (a subscriber benefit)
+
+enum RecordingStatus {
+  RECORDING
+  PROCESSING
+  READY
+  FAILED
+}
+
+model Recording {
+  id              String          @id @default(cuid())
+  guildId         String
+  channelId       String
+  startedBy       String
+  status          RecordingStatus @default(RECORDING)
+  startedAt       DateTime        @default(now())
+  endedAt         DateTime?
+  durationSeconds Int?
+  audioFile       String?
+  transcript      Json?
+  expiresAt       DateTime
+
+  @@index([guildId, startedAt])
+  @@index([expiresAt])
+}
+
 // Billing (per Discord server)
 
 enum CreditTransactionType {

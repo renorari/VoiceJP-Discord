@@ -5,6 +5,7 @@ import express from "express";
 import requireSession from "../middlewares/auth.ts";
 import { fetchManageableGuilds } from "../utils/guilds.ts";
 import billingRouter from "./billing.ts";
+import recordingsRouter from "./recordings.ts";
 
 const router = express.Router();
 
@@ -22,5 +23,6 @@ router.get("/guilds", requireSession, async (req, res) => {
 });
 
 router.use(billingRouter);
+router.use(recordingsRouter);
 
 export default router;

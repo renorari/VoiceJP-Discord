@@ -32,5 +32,8 @@ export const TOPUP_PACKS = {
     "large": { "yen": 3000, "credits": 33000 }
 } as const;
 
+// 月額プランに加入中として扱う Stripe の状態
+export const ACTIVE_SUBSCRIPTION_STATUSES = ["active", "trialing", "past_due"];
+
 export type SubscriptionPlanId = keyof typeof SUBSCRIPTION_PLANS;
 export type TopupPackId = keyof typeof TOPUP_PACKS;
