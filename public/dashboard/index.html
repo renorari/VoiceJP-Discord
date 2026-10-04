@@ -81,6 +81,21 @@
             margin-top: 8px;
         }
 
+        .plan {
+            flex: 1 1 180px;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .plan.current {
+            border-color: var(--primary-color);
+        }
+
+        .plan p {
+            margin: 4px 0;
+        }
+
         .credits {
             font-size: 32px;
             font-weight: bold;
@@ -154,9 +169,11 @@
             <p class="muted" id="subscription"></p>
             <p class="muted">クレジットがあるサーバーでは、OpenAIによる高精度な文字起こしと読み上げが使われます。残高がなくなると、無料の音声認識・合成に戻ります。</p>
 
+            <h2 style="margin-top: 20px;">月額プラン</h2>
+            <p class="muted">毎月クレジットが付与されます (使い切れなかった分は繰り越されます)。プランの変更は、次回の更新日から反映されます。</p>
+            <div class="row" id="plans"></div>
             <div class="row">
-                <button id="subscribe">月額プランに申し込む</button>
-                <button id="portal" class="secondary">支払いの管理</button>
+                <button id="portal" class="secondary">支払いの管理・解約</button>
             </div>
             <h2 style="margin-top: 20px;">クレジットを追加購入</h2>
             <div class="row" id="topup-packs"></div>

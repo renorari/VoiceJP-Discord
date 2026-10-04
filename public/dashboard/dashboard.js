@@ -62,14 +62,46 @@ function renderGuilds() {
     elements.guilds.hidden = false;
 }
 
+function renderPlans(subscription) {
+    const subscribed = ["active", "trialing", "past_due"].includes(subscription.status);
+
+    elements.plans.replaceChildren(...Object.entries(state.plans.subscriptionPlans).map(([plan, { name, yen, credits }]) => {
+        const current = subscribed && subscription.plan === plan;
+        const card = document.createElement("div");
+        card.className = current ? "plan current" : "plan";
+
+        const button = document.createElement("button");
+        button.textContent = current ? "加入中" : subscribed ? "このプランに変更" : "このプランで申し込む";
+        button.disabled = current;
+        button.addEventListener("click", () => subscribed ? changePlan(plan) : redirectTo(`/guilds/${state.guildId}/checkout/subscription`, { plan }));
+
+        const lines = [
+            [name, "h2"],
+            [`${yen.toLocaleString("ja-JP")}円 / 月`, "p"],
+            [`毎月 ${credits.toLocaleString("ja-JP")} クレジット`, "p"]
+        ];
+        card.replaceChildren(...lines.map(([text, tag]) => Object.assign(document.createElement(tag), { "textContent": text })), button);
+
+        return card;
+    }));
+}
+
+async function changePlan(plan) {
+    try {
+        await post(`/guilds/${state.guildId}/subscription/plan`, { plan });
+        await selectGuild(state.guildId);
+        show("プランを変更しました。次回の更新日から新しいプランで請求されます。");
+    } catch (error) {
+        show(error.message);
+    }
+}
+
 function renderBilling(guild, billing) {
     elements["guild-name"].textContent = guild.name;
     elements.credits.textContent = billing.credits.toLocaleString("ja-JP");
     elements.subscription.textContent = SUBSCRIPTION_LABELS[billing.subscription.status] || "月額プラン: 未加入";
 
-    const subscribed = ["active", "trialing", "past_due"].includes(billing.subscription.status);
-    elements.subscribe.disabled = subscribed;
-    elements.subscribe.textContent = `月額プランに申し込む (毎月 ${state.plans.subscriptionMonthlyCredits.toLocaleString("ja-JP")} クレジット)`;
+    renderPlans(billing.subscription);
 
     elements["transactions"].replaceChildren(...billing.transactions.map(transaction => {
         const row = document.createElement("tr");
@@ -107,7 +139,6 @@ async function init() {
         await post("/auth/sign-out");
         location.href = "/dashboard/";
     });
-    elements.subscribe.addEventListener("click", () => redirectTo(`/guilds/${state.guildId}/checkout/subscription`));
     elements.portal.addEventListener("click", () => redirectTo(`/guilds/${state.guildId}/portal`));
 
     try {

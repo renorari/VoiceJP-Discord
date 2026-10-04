@@ -5,12 +5,16 @@ import { skip } from "../db/database-fixture.ts";
 import assert from "node:assert/strict";
 import { after, before, mock, test } from "node:test";
 
-import { SUBSCRIPTION_MONTHLY_CREDITS, TOPUP_PACKS } from "./constants.ts";
+import { SUBSCRIPTION_PLANS, TOPUP_PACKS } from "./constants.ts";
 
 const prefix = `test-${Date.now()}`;
 const guildId = `${prefix}-sync`;
 const customer = `cus_${guildId}`;
 const DAY = 24 * 60 * 60;
+
+function invoice(id: string, billingReason: string, plan: string) {
+    return { id, customer, "billing_reason": billingReason, "lines": { "data": [{ "pricing": { "price_details": { "product": `voicejp-plan-${plan}` } } }] } };
+}
 
 const { default: prisma } = await import("../db/prisma.ts");
 const { default: stripe } = await import("./stripe.ts");
@@ -56,15 +60,25 @@ test("Stripe の顧客がないサーバーは何もしない", { skip }, async 
 
 test("支払い済みの月額プランの請求から毎月のクレジットが付与され、何度同期しても二重にならない", { skip }, async () => {
     fake.invoices = [
-        { "id": "in_1", customer, "billing_reason": "subscription_create" },
-        { "id": "in_2", customer, "billing_reason": "subscription_cycle" },
-        { "id": "in_manual", customer, "billing_reason": "manual" }
+        invoice("in_1", "subscription_create", "standard"),
+        invoice("in_2", "subscription_cycle", "standard"),
+        invoice("in_manual", "manual", "standard"),
+        invoice("in_unknown", "subscription_cycle", "unknown")
     ];
 
     await syncGuildBilling(guildId);
     await syncGuildBilling(guildId);
 
-    assert.equal((await billing()).credits, SUBSCRIPTION_MONTHLY_CREDITS * 2);
+    assert.equal((await billing()).credits, SUBSCRIPTION_PLANS.standard.credits * 2);
+});
+
+test("プランを変えると、変えたあとの請求からはそのプランのクレジットが付与される", { skip }, async () => {
+    const before = (await billing()).credits;
+    fake.invoices = [invoice("in_3", "subscription_cycle", "pro")];
+
+    await syncGuildBilling(guildId);
+
+    assert.equal((await billing()).credits, before + SUBSCRIPTION_PLANS.pro.credits);
 });
 
 test("支払い済みの追加購入だけパックのクレジットが付与される", { skip }, async () => {
@@ -96,13 +110,14 @@ test("コンビニ払いなど、あとから支払いが完了したら次の�
 
 test("サブスクリプションの状態と期限が保存される", { skip }, async () => {
     const periodEnd = Math.floor(Date.now() / 1000) + DAY;
-    fake.subscriptions = [{ "id": "sub_1", customer, "status": "active", "items": { "data": [{ "current_period_end": periodEnd }] } }];
+    fake.subscriptions = [{ "id": "sub_1", customer, "status": "active", "items": { "data": [{ "current_period_end": periodEnd, "price": { "product": "voicejp-plan-lite" } }] } }];
 
     await syncGuildBilling(guildId);
 
     const saved = await billing();
     assert.equal(saved.subscriptionStatus, "active");
     assert.equal(saved.stripeSubscriptionId, "sub_1");
+    assert.equal(saved.subscriptionPlan, "lite");
     assert.equal(saved.currentPeriodEnd?.getTime(), periodEnd * 1000);
 });
 

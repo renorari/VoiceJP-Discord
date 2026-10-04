@@ -2,8 +2,8 @@
 
 import express from "express";
 
-import { SUBSCRIPTION_MONTHLY_CREDITS, TOPUP_PACKS } from "../../billing/constants.ts";
-import { createPortalSession, createSubscriptionCheckout, createTopupCheckout } from "../../billing/stripe.ts";
+import { SUBSCRIPTION_PLANS, TOPUP_PACKS } from "../../billing/constants.ts";
+import { changeSubscriptionPlan, createPortalSession, createSubscriptionCheckout, createTopupCheckout, isPlanId } from "../../billing/stripe.ts";
 import { syncGuildBilling } from "../../billing/stripe-sync.ts";
 import prisma from "../../db/prisma.ts";
 import requireSession from "../middlewares/auth.ts";
@@ -21,7 +21,7 @@ const lastSyncs = new Map<string, number>();
 const router = express.Router();
 
 router.get("/plans", (req, res) => {
-    res.json({ "status": "ok", "subscriptionMonthlyCredits": SUBSCRIPTION_MONTHLY_CREDITS, "topupPacks": TOPUP_PACKS });
+    res.json({ "status": "ok", "subscriptionPlans": SUBSCRIPTION_PLANS, "topupPacks": TOPUP_PACKS });
 });
 
 router.use("/guilds/:guildId", requireSession, requireGuildManager);
@@ -36,7 +36,7 @@ router.get("/guilds/:guildId/billing", async (req, res) => {
     res.json({
         "status": "ok",
         "credits": billing?.credits ?? 0,
-        "subscription": { "status": billing?.subscriptionStatus ?? null, "currentPeriodEnd": billing?.currentPeriodEnd ?? null },
+        "subscription": { "status": billing?.subscriptionStatus ?? null, "plan": billing?.subscriptionPlan ?? null, "currentPeriodEnd": billing?.currentPeriodEnd ?? null },
         "transactions": billing?.transactions.map(({ type, amount, balanceAfter, createdAt }) => ({ type, amount, balanceAfter, createdAt })) ?? []
     });
 });
@@ -55,12 +55,32 @@ router.post("/guilds/:guildId/billing/sync", async (req, res) => {
 
 router.post("/guilds/:guildId/checkout/subscription", async (req, res) => {
     const { guildId } = req.params;
+    const plan = req.body?.plan;
+    if (!isPlanId(plan)) throw new HttpError(400);
+
     const billing = await prisma.guildBilling.findUnique({ "where": { guildId } });
     if (billing?.subscriptionStatus && ACTIVE_SUBSCRIPTION_STATUSES.includes(billing.subscriptionStatus)) {
         throw new HttpError(409);
     }
 
-    res.json({ "status": "ok", "url": await createSubscriptionCheckout(guildId) });
+    res.json({ "status": "ok", "url": await createSubscriptionCheckout(guildId, plan) });
+});
+
+// 加入中のプランを変更する (次回の更新日から反映)
+router.post("/guilds/:guildId/subscription/plan", async (req, res) => {
+    const { guildId } = req.params;
+    const plan = req.body?.plan;
+    if (!isPlanId(plan)) throw new HttpError(400);
+
+    const billing = await prisma.guildBilling.findUnique({ "where": { guildId } });
+    if (!billing?.stripeSubscriptionId || !billing.subscriptionStatus || !ACTIVE_SUBSCRIPTION_STATUSES.includes(billing.subscriptionStatus)) {
+        throw new HttpError(400);
+    }
+
+    await changeSubscriptionPlan(billing.stripeSubscriptionId, plan);
+    await syncGuildBilling(guildId);
+
+    res.json({ "status": "ok" });
 });
 
 router.post("/guilds/:guildId/checkout/topup", async (req, res) => {

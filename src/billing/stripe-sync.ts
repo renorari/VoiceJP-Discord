@@ -2,9 +2,9 @@
 
 import log from "#utils/logger.ts";
 import prisma from "../db/prisma.ts";
-import { SUBSCRIPTION_MONTHLY_CREDITS, TOPUP_PACKS } from "./constants.ts";
+import { SUBSCRIPTION_PLANS, TOPUP_PACKS } from "./constants.ts";
 import { grantCredits } from "./credits.ts";
-import stripe from "./stripe.ts";
+import stripe, { planIdFromProduct } from "./stripe.ts";
 
 import type Stripe from "stripe";
 import type { TopupPackId } from "./constants.ts";
@@ -16,14 +16,15 @@ const SYNC_INTERVAL = 10 * 60 * 1000;
 const logger = log.getLogger("billing");
 
 async function grantInvoice(guildId: string, invoice: Stripe.Invoice) {
-    if (!invoice.billing_reason?.startsWith("subscription")) return;
+    const plan = planIdFromProduct(invoice.lines.data[0]?.pricing?.price_details?.product);
+    if (!invoice.billing_reason?.startsWith("subscription") || !plan) return;
 
     await grantCredits({
         guildId,
-        "amount": SUBSCRIPTION_MONTHLY_CREDITS,
+        "amount": SUBSCRIPTION_PLANS[plan].credits,
         "type": "SUBSCRIPTION_GRANT",
         "idempotencyKey": `invoice:${invoice.id}`,
-        "detail": { "invoiceId": invoice.id }
+        "detail": { "invoiceId": invoice.id, plan }
     });
 }
 
@@ -41,13 +42,15 @@ async function grantCheckout(guildId: string, session: Stripe.Checkout.Session) 
 }
 
 async function saveSubscription(guildId: string, subscription: Stripe.Subscription) {
-    const periodEnd = subscription.items.data[0]?.current_period_end;
+    const item = subscription.items.data[0];
+    const periodEnd = item?.current_period_end;
 
     await prisma.guildBilling.update({
         "where": { guildId },
         "data": {
             "stripeSubscriptionId": subscription.id,
             "subscriptionStatus": subscription.status,
+            "subscriptionPlan": planIdFromProduct(item?.price.product) ?? null,
             "currentPeriodEnd": periodEnd ? new Date(periodEnd * 1000) : null
         }
     });

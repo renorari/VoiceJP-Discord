@@ -82,6 +82,7 @@ model GuildBilling {
   stripeCustomerId     String?             @unique
   stripeSubscriptionId String?             @unique
   subscriptionStatus   String?
+  subscriptionPlan     String?
   currentPeriodEnd     DateTime?
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt

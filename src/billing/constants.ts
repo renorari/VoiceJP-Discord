@@ -18,8 +18,12 @@ export const CREDITS_PER_YEN = 10;
 export const TRANSCRIPTION_CREDITS_PER_MINUTE = 12;
 export const SPEECH_CREDITS_PER_100_CHARACTERS = 6;
 
-// 月額プラン (980 円) で毎月付与されるクレジット
-export const SUBSCRIPTION_MONTHLY_CREDITS = 10000;
+// 月額プラン (金額は税込、credits は毎月付与される分)。プランを足したり変えたりするときはここだけ直す
+export const SUBSCRIPTION_PLANS = {
+    "lite": { "name": "ライト", "yen": 500, "credits": 5500 },
+    "standard": { "name": "スタンダード", "yen": 980, "credits": 11000 },
+    "pro": { "name": "プロ", "yen": 2980, "credits": 36000 }
+} as const;
 
 // 追加購入できるクレジットパック (金額は税込)
 export const TOPUP_PACKS = {
@@ -28,4 +32,5 @@ export const TOPUP_PACKS = {
     "large": { "yen": 3000, "credits": 33000 }
 } as const;
 
+export type SubscriptionPlanId = keyof typeof SUBSCRIPTION_PLANS;
 export type TopupPackId = keyof typeof TOPUP_PACKS;
