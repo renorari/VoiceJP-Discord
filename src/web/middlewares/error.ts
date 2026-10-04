@@ -9,6 +9,7 @@ const MESSAGES: Record<number, [string, string]> = {
     403: ["Forbidden", "アクセスが許可されていません"],
     404: ["Not Found", "見つかりませんでした"],
     405: ["Method Not Allowed", "許可されていないメソッドです"],
+    409: ["Conflict", "すでに登録されています"],
     413: ["Payload Too Large", "リクエストが大きすぎます"],
     429: ["Too Many Requests", "リクエストが多すぎます"],
     500: ["Internal Server Error", "サーバー内部でエラーが発生しました"]

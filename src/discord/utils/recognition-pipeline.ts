@@ -30,5 +30,11 @@ export default function createRecognitionPipeline(opusStream: Readable, model: v
         if (text.length > 0) onText(text);
     });
 
-    return { decoder, voice, recognizer };
+    return {
+        "dispose": () => {
+            decoder.destroy();
+            voice.destroy();
+            recognizer.free();
+        }
+    };
 }

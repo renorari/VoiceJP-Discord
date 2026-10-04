@@ -1,6 +1,8 @@
 // Speech recognition command
 
+import { chargeTranscription, hasCredits } from "#billing/usage.ts";
 import log from "#utils/logger.ts";
+import { transcribe } from "#utils/openai.ts";
 import ensureVoskModel from "#utils/vosk-model.ts";
 import { ChannelType, EmbedBuilder, MessageFlags } from "discord.js";
 import * as vosk from "vosk";
@@ -13,6 +15,7 @@ import {
 import { MemberRecognitionDataMap } from "../../utils/recognition.ts";
 import createRecognitionPipeline from "../../utils/recognition-pipeline.ts";
 import { replyEphemeral, replyNoVoiceChannel } from "../../utils/reply.ts";
+import createUtterancePipeline from "../../utils/utterance-pipeline.ts";
 
 import type { VoiceConnection } from "@discordjs/voice";
 import type { ChatInputCommandInteraction, Client, GuildMember, TextChannel, VoiceChannel, VoiceState } from "discord.js";
@@ -26,7 +29,10 @@ const READY_TIMEOUT = 20_000;
 const MEMBER_LIMIT_MESSAGE = `音声認識は最大${MEMBER_LIMIT}人まで対応しています。ボイスチャンネルの参加者を減らしてから再度実行してください。`;
 const WEBHOOK_LIMIT_MESSAGE = "テキストチャンネルのWebhookが上限に達しているため、音声認識を開始できません。不要なWebhookを削除してから再度実行してください。";
 
+const CREDITS_EXHAUSTED_MESSAGE = "クレジットが無くなったため、無料の音声認識に切り替えます。クレジットを追加すると、次回の開始から高精度な音声認識が使えます。";
+
 const logger = log.getLogger("discord");
+const switchingGuilds = new Set<string>();
 
 let voskModel: vosk.Model | undefined;
 
@@ -38,8 +44,11 @@ async function getVoskModel() {
 // 初回起動時はバックグラウンドでモデルをダウンロードしておく
 ensureVoskModel().catch(error => logger.error(error));
 
-async function addMember(member: GuildMember, members: MemberRecognitionDataMap, connection: VoiceConnection, channel: TextChannel | VoiceChannel) {
-    const model = await getVoskModel();
+// クレジットが残っていれば OpenAI、なければ Vosk で文字起こしする
+async function addMember(member: GuildMember, members: MemberRecognitionDataMap, connection: VoiceConnection, channel: TextChannel | VoiceChannel, useFreeEngine = false) {
+    const guildId = member.guild.id;
+    const paid = !useFreeEngine && await hasCredits(guildId);
+    const model = paid ? undefined : await getVoskModel();
 
     const webhook = await channel.createWebhook({
         "name": `${member.displayName.slice(0, NAME_LIMIT)} ${WEBHOOK_SUFFIX}`,
@@ -52,13 +61,47 @@ async function addMember(member: GuildMember, members: MemberRecognitionDataMap,
     });
     opusStream.on("error", error => logger.error(error));
 
-    const { decoder, voice, recognizer } = createRecognitionPipeline(opusStream, model, text => {
+    function send(text: string) {
         webhook.send({
             "content": text.slice(0, MESSAGE_LIMIT) + (text.length > MESSAGE_LIMIT ? "…" : "")
         }).catch(error => logger.error(error));
-    });
+    }
 
-    members.set(member.id, { member, webhook, voice, opusStream, decoder, recognizer });
+    const { dispose } = model
+        ? createRecognitionPipeline(opusStream, model, send)
+        : createUtterancePipeline(opusStream, async (pcm, seconds) => {
+            try {
+                const text = await transcribe(pcm);
+                if (text) send(text);
+
+                if (await chargeTranscription(guildId, seconds, member.id)) {
+                    await switchToFreeEngine(members, connection, channel);
+                }
+            } catch (error) {
+                logger.error(error);
+            }
+        });
+
+    members.set(member.id, { member, webhook, opusStream, dispose });
+}
+
+// クレジットを使い切ったら、参加中の全員を無料のエンジンに切り替える
+async function switchToFreeEngine(members: MemberRecognitionDataMap, connection: VoiceConnection, channel: TextChannel | VoiceChannel) {
+    const guildId = channel.guild.id;
+    if (switchingGuilds.has(guildId)) return;
+    switchingGuilds.add(guildId);
+
+    try {
+        const targets = Array.from(members.values()).map(data => data.member);
+        targets.forEach(member => members.delete(member.id));
+
+        await channel.send(CREDITS_EXHAUSTED_MESSAGE);
+        for (const member of targets) {
+            await addMember(member, members, connection, channel, true).catch(error => logger.error(error));
+        }
+    } finally {
+        switchingGuilds.delete(guildId);
+    }
 }
 
 async function replyMessage(interaction: ChatInputCommandInteraction, members: MemberRecognitionDataMap) {

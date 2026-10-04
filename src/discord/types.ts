@@ -2,9 +2,6 @@
 
 import type { AudioPlayer, AudioReceiveStream, VoiceConnection } from "@discordjs/voice";
 import type { ChatInputCommandInteraction, GuildMember, Webhook } from "discord.js";
-import type { Transform } from "node:stream";
-import type { Recognizer, SpeakerRecognizerParam } from "vosk";
-import type FillSilenceStream from "./utils/fill-silence.ts";
 import type { MemberRecognitionDataMap } from "./utils/recognition.ts";
 
 export interface Connection {
@@ -24,10 +21,8 @@ export interface SynthesisChannel {
 export interface RecognitionMemberData {
     member: GuildMember;
     webhook: Webhook;
-    voice: FillSilenceStream;
     opusStream: AudioReceiveStream;
-    decoder: Transform;
-    recognizer: Recognizer<SpeakerRecognizerParam>;
+    dispose: () => void;
 }
 
 export interface RecognitionChannel {

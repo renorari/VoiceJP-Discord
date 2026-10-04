@@ -6,9 +6,7 @@ import type { RecognitionChannel, RecognitionMemberData } from "../types.ts";
 
 function disposeMember(data: RecognitionMemberData) {
     data.opusStream.destroy();
-    data.decoder.destroy();
-    data.voice.destroy();
-    data.recognizer.free();
+    data.dispose();
     data.webhook.delete(WEBHOOK_DELETE_REASON).catch(() => {});
 }
 

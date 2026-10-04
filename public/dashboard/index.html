@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>VoiceJP | ダッシュボード</title>
+    <link rel="icon" href="/favicon.ico">
+    <style>
+        :root {
+            --background: #edeae8;
+            --surface: #fff;
+            --text-color: #503f35;
+            --primary-color: #2F4673;
+            --secondary-color: #5872A6;
+            --border-color: #d8d2cd;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text-color);
+            font-family: Arial, sans-serif;
+        }
+
+        header,
+        main {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        h1,
+        h2 {
+            margin: 0 0 12px;
+            color: var(--primary-color);
+        }
+
+        section {
+            margin-bottom: 16px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--surface);
+        }
+
+        button {
+            padding: 8px 16px;
+            border: 0;
+            border-radius: 6px;
+            background: var(--primary-color);
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        button.secondary {
+            background: var(--secondary-color);
+        }
+
+        button:disabled {
+            opacity: .5;
+            cursor: default;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .credits {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .guild {
+            display: block;
+            width: 100%;
+            margin-bottom: 8px;
+            text-align: left;
+            background: var(--surface);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 6px 4px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        td:last-child {
+            text-align: right;
+        }
+
+        .muted {
+            color: #8a7b71;
+            font-size: 14px;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>VoiceJP ダッシュボード</h1>
+        <div>
+            <span id="user" class="muted"></span>
+            <button id="logout" class="secondary" hidden>ログアウト</button>
+        </div>
+    </header>
+
+    <main>
+        <p id="message" class="muted" hidden></p>
+
+        <section id="login" hidden>
+            <h2>ログイン</h2>
+            <p class="muted">サーバーのクレジットを管理するには、Discordでログインしてください。</p>
+            <div class="row"><button id="login-button">Discordでログイン</button></div>
+        </section>
+
+        <section id="guilds" hidden>
+            <h2>サーバーを選ぶ</h2>
+            <p class="muted">「サーバー管理」権限を持つサーバーが表示されます。</p>
+            <div id="guild-list"></div>
+        </section>
+
+        <section id="billing" hidden>
+            <h2 id="guild-name"></h2>
+            <p class="muted">クレジット残高</p>
+            <p class="credits" id="credits"></p>
+            <p class="muted" id="subscription"></p>
+            <p class="muted">クレジットがあるサーバーでは、OpenAIによる高精度な文字起こしと読み上げが使われます。残高がなくなると、無料の音声認識・合成に戻ります。</p>
+
+            <div class="row">
+                <button id="subscribe">月額プランに申し込む</button>
+                <button id="portal" class="secondary">支払いの管理</button>
+            </div>
+            <h2 style="margin-top: 20px;">クレジットを追加購入</h2>
+            <div class="row" id="topup-packs"></div>
+
+            <h2 style="margin-top: 20px;">履歴</h2>
+            <table id="transactions"></table>
+        </section>
+    </main>
+
+    <script src="/dashboard/dashboard.js"></script>
+</body>
+
+</html>

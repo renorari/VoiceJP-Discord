@@ -6,6 +6,7 @@ import { defineConfig } from "eslint/config";
 import renorari from "./eslint/index";
 
 export default defineConfig([
+    { "ignores": ["src/generated/**"] },
     { "files": ["**/*.{js,mjs,cjs,ts,mts,cts}"], "plugins": { js }, "extends": ["js/recommended"], "languageOptions": { "globals": globals.node } },
     tseslint.configs.recommended,
     {

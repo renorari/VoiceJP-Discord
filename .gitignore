@@ -223,3 +223,6 @@ voices/*.htsvoice
 vosk-model/*
 vosk-model.tmp/
 voices/*.tmp/
+
+# Prisma generated client
+src/generated/

@@ -26,9 +26,13 @@ fs.access(DICTIONARY_PATH).catch(() => {
 // 初回起動時はバックグラウンドで音声モデルをダウンロードしておく
 ensureVoiceModel().catch(error => logger.error(error));
 
+export function createTempWavPath() {
+    return path.join(TEMP_DIR, `speech_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.wav`);
+}
+
 export default async function synthesizeSpeech(text: string) {
     const modelPath = await ensureVoiceModel();
-    const tempWavPath = path.join(TEMP_DIR, `speech_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.wav`);
+    const tempWavPath = createTempWavPath();
     const openJTalk = cp.spawn(COMMAND, [
         "-x", DICTIONARY_PATH,
         "-m", modelPath,

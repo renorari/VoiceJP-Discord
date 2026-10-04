@@ -12,6 +12,7 @@ export const EMBED_COLOR = Colors.DarkBlue;
 export const AUDIO_SAMPLE_RATE = 48000;
 export const AUDIO_CHANNELS = 1;
 export const AUDIO_FRAME_SIZE = 960;
+export const AUDIO_BYTES_PER_SAMPLE = 2;
 
 export const WEBHOOK_SUFFIX = "[VoiceJP]";
 export const WEBHOOK_CREATE_REASON = "VoiceJPの音声認識用";

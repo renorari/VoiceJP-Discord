@@ -2,9 +2,7 @@
 
 import stream from "node:stream";
 
-import { AUDIO_CHANNELS, AUDIO_FRAME_SIZE, AUDIO_SAMPLE_RATE } from "../constants/index.ts";
-
-const BYTES_PER_SAMPLE = 2;
+import { AUDIO_BYTES_PER_SAMPLE, AUDIO_CHANNELS, AUDIO_FRAME_SIZE, AUDIO_SAMPLE_RATE } from "../constants/index.ts";
 
 export default class FillSilenceStream extends stream.Transform {
     current: Buffer[] = [];
@@ -13,7 +11,7 @@ export default class FillSilenceStream extends stream.Transform {
     constructor(rate: number = AUDIO_SAMPLE_RATE, channels: number = AUDIO_CHANNELS, frameSize: number = AUDIO_FRAME_SIZE) {
         super();
         this.interval = setInterval(() => {
-            this.push(this.current.shift() ?? Buffer.alloc(frameSize * BYTES_PER_SAMPLE * channels));
+            this.push(this.current.shift() ?? Buffer.alloc(frameSize * AUDIO_BYTES_PER_SAMPLE * channels));
         }, 1000 / (rate / frameSize));
     }
 

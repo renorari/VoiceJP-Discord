@@ -1,0 +1,103 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Better Auth
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+// Billing (per Discord server)
+
+enum CreditTransactionType {
+  SUBSCRIPTION_GRANT
+  TOPUP
+  USAGE_TRANSCRIPTION
+  USAGE_SPEECH
+  ADJUSTMENT
+}
+
+model GuildBilling {
+  guildId              String              @id
+  credits              Int                 @default(0)
+  stripeCustomerId     String?             @unique
+  stripeSubscriptionId String?             @unique
+  subscriptionStatus   String?
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  transactions         CreditTransaction[]
+}
+
+model CreditTransaction {
+  id             String                @id @default(cuid())
+  guildId        String
+  guild          GuildBilling          @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
+  type           CreditTransactionType
+  amount         Int
+  balanceAfter   Int
+  idempotencyKey String?               @unique
+  detail         Json?
+  createdAt      DateTime              @default(now())
+
+  @@index([guildId, createdAt])
+}
