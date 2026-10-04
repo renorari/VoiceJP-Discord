@@ -93,6 +93,8 @@ async function selectGuild(guildId) {
     history.replaceState(null, "", `?guild=${guildId}`);
     show("");
     try {
+        // 支払い直後やコンビニ払いの完了を反映するため、Stripe の最新の状態を取り込んでから表示する
+        await post(`/guilds/${guildId}/billing/sync`);
         renderBilling(guild, await api(`/guilds/${guildId}/billing`));
     } catch (error) {
         show(error.message);
@@ -125,7 +127,7 @@ async function init() {
         }));
 
         renderGuilds();
-        if (params.get("checkout") === "success") show("お支払いを受け付けました。反映まで数十秒かかることがあります。");
+        if (params.get("checkout") === "success") show("お支払いありがとうございます。コンビニ払いなどは、支払いの完了後に反映されます。");
         if (state.guildId) await selectGuild(state.guildId);
     } catch (error) {
         if (error.status === 401) {

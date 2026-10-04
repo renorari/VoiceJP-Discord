@@ -1,13 +1,12 @@
-// Paid engine gating and usage charging (requires DATABASE_URL)
+// Paid engine gating and usage charging (requires TEST_DATABASE_URL)
 
-import "dotenv/config";
+import { skip } from "../db/database-fixture.ts";
 
 import assert from "node:assert/strict";
 import { after, test } from "node:test";
 
 import { getBalance, grantCredits, speechCost, transcriptionCost } from "./credits.ts";
 
-const skip = !process.env.DATABASE_URL;
 const guildId = `test-${Date.now()}-usage`;
 const INITIAL_CREDITS = 100;
 

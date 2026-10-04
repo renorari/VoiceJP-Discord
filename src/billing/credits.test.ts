@@ -1,6 +1,6 @@
-// Credit ledger tests (requires DATABASE_URL)
+// Credit ledger tests (requires TEST_DATABASE_URL)
 
-import "dotenv/config";
+import { skip } from "../db/database-fixture.ts";
 
 import assert from "node:assert/strict";
 import { after, test } from "node:test";
@@ -8,7 +8,6 @@ import { after, test } from "node:test";
 import { SPEECH_CREDITS_PER_100_CHARACTERS, TRANSCRIPTION_CREDITS_PER_MINUTE } from "./constants.ts";
 import { consumeCredits, getBalance, grantCredits, speechCost, transcriptionCost } from "./credits.ts";
 
-const skip = !process.env.DATABASE_URL;
 const guildId = `test-${Date.now()}`;
 
 const { default: prisma } = await import("../db/prisma.ts");

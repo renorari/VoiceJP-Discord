@@ -4,6 +4,7 @@ import express from "express";
 
 import { SUBSCRIPTION_MONTHLY_CREDITS, TOPUP_PACKS } from "../../billing/constants.ts";
 import { createPortalSession, createSubscriptionCheckout, createTopupCheckout } from "../../billing/stripe.ts";
+import { syncGuildBilling } from "../../billing/stripe-sync.ts";
 import prisma from "../../db/prisma.ts";
 import requireSession from "../middlewares/auth.ts";
 import { HttpError } from "../middlewares/error.ts";
@@ -13,6 +14,9 @@ import type { TopupPackId } from "../../billing/constants.ts";
 
 const ACTIVE_SUBSCRIPTION_STATUSES = ["active", "trialing", "past_due"];
 const TRANSACTION_LIMIT = 20;
+const SYNC_COOLDOWN = 15 * 1000;
+
+const lastSyncs = new Map<string, number>();
 
 const router = express.Router();
 
@@ -35,6 +39,18 @@ router.get("/guilds/:guildId/billing", async (req, res) => {
         "subscription": { "status": billing?.subscriptionStatus ?? null, "currentPeriodEnd": billing?.currentPeriodEnd ?? null },
         "transactions": billing?.transactions.map(({ type, amount, balanceAfter, createdAt }) => ({ type, amount, balanceAfter, createdAt })) ?? []
     });
+});
+
+// Stripe の最新の支払いを取り込む (連打されても Stripe を呼びすぎないよう間隔を空ける)
+router.post("/guilds/:guildId/billing/sync", async (req, res) => {
+    const { guildId } = req.params;
+
+    if (Date.now() - (lastSyncs.get(guildId) ?? 0) > SYNC_COOLDOWN) {
+        lastSyncs.set(guildId, Date.now());
+        await syncGuildBilling(guildId);
+    }
+
+    res.json({ "status": "ok" });
 });
 
 router.post("/guilds/:guildId/checkout/subscription", async (req, res) => {

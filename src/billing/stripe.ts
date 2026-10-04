@@ -11,7 +11,6 @@ const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 const DASHBOARD_URL = `${BASE_URL}/dashboard/`;
 
 export const SUBSCRIPTION_PRICE_ID = process.env.STRIPE_SUBSCRIPTION_PRICE_ID || "";
-export const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || "";
 
 // キーが未設定でも起動できるようにダミーを渡す (課金 API を呼んだときに Stripe 側で認証エラーになる)
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_not_configured");
