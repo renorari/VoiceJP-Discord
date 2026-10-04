@@ -2,7 +2,10 @@
 
 import "dotenv/config";
 
+import log from "#utils/logger.ts";
 import { Client, Events, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from "discord.js";
+
+const logger = log.getLogger("discord");
 
 const TOKEN = process.env.DISCORD_BOT_TOKEN || "";
 const COMMANDS = [
@@ -15,7 +18,7 @@ const client = new Client({ "intents": [GatewayIntentBits.Guilds] });
 const restClient = new REST({ "version": "10" }).setToken(TOKEN);
 
 client.on(Events.ClientReady, async (readyClient) => {
-    console.log(`Logged in as ${readyClient.user.tag}!`);
+    logger.info(`Logged in as ${readyClient.user.tag}!`);
 
     await restClient.put(
         Routes.applicationCommands(readyClient.user.id),

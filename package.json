@@ -39,12 +39,18 @@
     "discord.js": "^14.27.0",
     "dotenv": "^18.0.5",
     "express": "^5.2.1",
-    "helmet": "^8.3.0"
+    "helmet": "^8.3.0",
+    "log4js": "^6.9.1"
   },
   "scripts": {
     "start": "node src/main.ts",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "typecheck": "tsc --noEmit"
+  },
+  "imports": {
+    "#*.ts": "./src/*.ts",
+    "#*.js": "./src/*.js",
+    "#*.json": "./src/*.json"
   }
 }
