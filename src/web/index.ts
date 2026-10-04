@@ -15,6 +15,7 @@ import { errorHandler, notFoundHandler } from "./middlewares/error.ts";
 import logMiddleware from "./middlewares/log.ts";
 
 const PUBLIC_DIR = "public";
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const PORT = parseInt(process.env.PORT || "3000", 10);
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 
@@ -22,7 +23,11 @@ const logger = log.getLogger("web");
 
 const app = express();
 
-app.use(helmet());
+// Safari は localhost の http でも https への自動切り替えをするので、本番以外では外す
+app.use(helmet(IS_PRODUCTION ? {} : {
+    "contentSecurityPolicy": { "directives": { "upgrade-insecure-requests": null } },
+    "strictTransportSecurity": false
+}));
 app.use(cors());
 app.use(logMiddleware(log.getLogger("access")));
 
