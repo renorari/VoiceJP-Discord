@@ -11,6 +11,7 @@ import apiRouter from "./api/index.ts";
 import { errorHandler, notFoundHandler } from "./middlewares/error.ts";
 import logMiddleware from "./middlewares/log.ts";
 
+const PUBLIC_DIR = "public";
 const PORT = parseInt(process.env.PORT || "3000", 10);
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 
@@ -24,7 +25,7 @@ app.use(logMiddleware(log.getLogger("access")));
 app.use(express.json());
 app.use(express.urlencoded({ "extended": true }));
 
-app.use(express.static("public"));
+app.use(express.static(PUBLIC_DIR));
 
 app.use("/api", apiRouter);
 

@@ -2,15 +2,18 @@
 
 import log4js from "log4js";
 
+const LOG_DIR = "logs";
+const DATE_PATTERN = "yyyy-MM-dd";
+const NUM_BACKUPS = 1826;
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 function dateFileAppender(name: string) {
     return {
         "type": "dateFile",
-        "filename": `logs/${name}.log`,
-        "pattern": "yyyy-MM-dd",
+        "filename": `${LOG_DIR}/${name}.log`,
+        "pattern": DATE_PATTERN,
         "keepFileExt": true,
-        "numBackups": 1826,
+        "numBackups": NUM_BACKUPS,
         "compress": true
     };
 }
