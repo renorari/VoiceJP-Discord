@@ -1,1 +1,3 @@
 // VoiceJP
+
+import "./discord.ts";

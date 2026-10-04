@@ -13,6 +13,13 @@ export default defineConfig([
             "@renorari": renorari
         },
         "rules": {
+            "func-style": [
+                "error",
+                "declaration",
+                {
+                    "allowArrowFunctions": false
+                }
+            ],
             "@typescript-eslint/no-unused-vars": [
                 "error",
                 {
