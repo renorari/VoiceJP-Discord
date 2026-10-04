@@ -16,6 +16,7 @@ import logMiddleware from "./middlewares/log.ts";
 
 const PUBLIC_DIR = "public";
 const SASHIMI_UI_DIR = "node_modules/sashimi-ui/dist/css";
+const STRICT_PATHS = ["/dashboard", "/api", "/vendor"];
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const PORT = parseInt(process.env.PORT || "3000", 10);
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
@@ -24,9 +25,9 @@ const logger = log.getLogger("web");
 
 const app = express();
 
-// ダッシュボードで Discord のアイコンを表示するため、画像は Discord の CDN も許可する
+// ダッシュボードと API は厳しい設定にする。ダッシュボードで Discord のアイコンを表示するため、画像は Discord の CDN も許可する
 // Safari は localhost の http でも https への自動切り替えをするので、本番以外ではそれを外す
-app.use(helmet({
+const strictHelmet = helmet({
     "contentSecurityPolicy": {
         "directives": {
             "img-src": ["'self'", "data:", "https://cdn.discordapp.com"],
@@ -34,7 +35,14 @@ app.use(helmet({
         }
     },
     "strictTransportSecurity": IS_PRODUCTION
-}));
+});
+// 紹介ページは Google アナリティクスや AdSense を読み込むので、CSP は付けない
+const siteHelmet = helmet({
+    "contentSecurityPolicy": false,
+    "strictTransportSecurity": IS_PRODUCTION
+});
+
+app.use((req, res, next) => (STRICT_PATHS.some(path => req.path.startsWith(path)) ? strictHelmet : siteHelmet)(req, res, next));
 app.use(cors());
 app.use(logMiddleware(log.getLogger("access")));
 
