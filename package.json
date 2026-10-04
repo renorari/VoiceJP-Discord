@@ -64,8 +64,10 @@
     "setup": "node src/setup.ts",
     "test": "node --test --test-concurrency=1",
     "postinstall": "prisma generate && npm run setup",
-    "db:migrate": "prisma migrate deploy",
-    "db:dev": "prisma migrate dev",
+    "prisma:migrate": "prisma migrate",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:generate": "prisma generate",
+    "prisma:studio": "prisma studio --browser=none",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "typecheck": "tsc --noEmit"
