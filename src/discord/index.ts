@@ -6,6 +6,7 @@ import log from "#utils/logger.ts";
 import { Client, Events } from "discord.js";
 
 import { clientOptions, commands } from "./constants/index.ts";
+import handleEngineCommand from "./handlers/commands/engine.ts";
 import handleJoinCommand from "./handlers/commands/join.ts";
 import handleLeaveCommand from "./handlers/commands/leave.ts";
 import { handleRecordStartCommand, handleRecordStopCommand, handleVoiceStateUpdateRecording } from "./handlers/commands/record.ts";
@@ -38,6 +39,7 @@ const state: State = {
 const guildCommandHandlers: Record<string, (interaction: ChatInputCommandInteraction<"cached">) => Promise<void>> = {
     "join": interaction => handleJoinCommand(interaction, state),
     "leave": interaction => handleLeaveCommand(interaction, state),
+    "engine": interaction => handleEngineCommand(interaction),
     "record start": interaction => handleRecordStartCommand(client, interaction, state),
     "record stop": interaction => handleRecordStopCommand(interaction, state),
     "speech synthesis": interaction => handleSpeechSynthesisCommand(client, interaction, state),

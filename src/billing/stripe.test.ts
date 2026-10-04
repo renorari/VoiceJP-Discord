@@ -18,10 +18,16 @@ const createdProducts: object[] = [];
 const sessions: Record<string, unknown>[] = [];
 const updates: Record<string, unknown>[] = [];
 let productExists = false;
+let productName: string | undefined;
+const updatedProducts: object[] = [];
 
 mock.method(stripe.customers, "create", async () => ({ "id": `cus_${guildId}` }));
-mock.method(stripe.products, "retrieve", async () => {
+mock.method(stripe.products, "retrieve", async (id: string) => {
     if (!productExists) throw missing;
+    return { "name": productName ?? `VoiceJP+ ${id.endsWith("pro") ? "プロ" : ""}プラン` };
+});
+mock.method(stripe.products, "update", async (_id: string, params: object) => {
+    updatedProducts.push(params);
     return {};
 });
 mock.method(stripe.products, "create", async (params: object) => {
@@ -59,7 +65,7 @@ test("プランの商品がなければ作り、プランの金額で月額の�
     assert.equal(await createSubscriptionCheckout(guildId, "pro"), "https://checkout.example/session");
 
     assert.equal(createdProducts.length, 1);
-    assert.deepEqual(createdProducts[0], { "id": "voicejp-plan-pro", "name": "VoiceJP プロプラン", "metadata": { "plan": "pro" } });
+    assert.deepEqual(createdProducts[0], { "id": "voicejp-plan-pro", "name": "VoiceJP+ プロプラン", "metadata": { "plan": "pro" } });
 
     const [session] = sessions;
     assert.equal(session.mode, "subscription");
@@ -70,10 +76,15 @@ test("プランの商品がなければ作り、プランの金額で月額の�
     }]);
 });
 
-test("商品がすでにあれば作り直さない", { skip }, async () => {
+test("商品がすでにあれば作り直さず、名前が違うときだけ更新する", { skip }, async () => {
     await createSubscriptionCheckout(guildId, "pro");
-
     assert.equal(createdProducts.length, 1);
+    assert.equal(updatedProducts.length, 0);
+
+    productName = "VoiceJP プロプラン";
+    await createSubscriptionCheckout(guildId, "pro");
+    assert.deepEqual(updatedProducts, [{ "name": "VoiceJP+ プロプラン" }]);
+    productName = undefined;
 });
 
 test("プランの変更は日割りなしで、次回の更新から新しい金額になる", { skip }, async () => {

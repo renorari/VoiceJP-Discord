@@ -24,7 +24,7 @@ const READY_TIMEOUT = 20_000;
 const MEMBER_LIMIT_MESSAGE = `音声認識は最大${MEMBER_LIMIT}人まで対応しています。ボイスチャンネルの参加者を減らしてから再度実行してください。`;
 const WEBHOOK_LIMIT_MESSAGE = "テキストチャンネルのWebhookが上限に達しているため、音声認識を開始できません。不要なWebhookを削除してから再度実行してください。";
 
-const CREDITS_EXHAUSTED_MESSAGE = "クレジットが無くなったため、無料の音声認識に切り替えます。クレジットを追加すると、次回の開始から高精度な音声認識が使えます。";
+const CREDITS_EXHAUSTED_MESSAGE = "VoiceJP+ のクレジットが無くなったため、標準 (無料) の音声認識に切り替えます。クレジットを追加すると、次回の開始から高精度な音声認識が使えます。";
 const EXHAUSTED_NOTICE_INTERVAL = 10 * 60 * 1000;
 
 const logger = log.getLogger("discord");

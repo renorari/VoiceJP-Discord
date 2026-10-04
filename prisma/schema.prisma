@@ -92,6 +92,20 @@ model Recording {
   @@index([expiresAt])
 }
 
+// Engine choice per Discord server (FREE = Vosk / Open JTalk, PLUS = VoiceJP+ with OpenAI)
+
+enum SpeechEngine {
+  FREE
+  PLUS
+}
+
+model GuildSettings {
+  guildId           String       @id
+  synthesisEngine   SpeechEngine @default(PLUS)
+  recognitionEngine SpeechEngine @default(PLUS)
+  updatedAt         DateTime     @updatedAt
+}
+
 // Billing (per Discord server)
 
 enum CreditTransactionType {

@@ -1,6 +1,6 @@
-// Speech-to-text for one member: OpenAI while the server has credits, Vosk otherwise
+// Speech-to-text for one member: OpenAI (VoiceJP+) while chosen and credits last, Vosk otherwise
 
-import { chargeTranscription, hasCredits } from "#billing/usage.ts";
+import { chargeTranscription, shouldUsePlus } from "#billing/usage.ts";
 import log from "#utils/logger.ts";
 import { transcribe } from "#utils/openai.ts";
 import createRecognitionPipeline from "./recognition-pipeline.ts";
@@ -49,7 +49,7 @@ export default async function createTranscriber(opusStream: Readable, { guildId,
         }));
     }
 
-    if (await hasCredits(guildId)) {
+    if (await shouldUsePlus(guildId, "recognition")) {
         startPaid();
     } else {
         await startFree();

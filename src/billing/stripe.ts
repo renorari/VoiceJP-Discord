@@ -32,11 +32,15 @@ export function planIdFromProduct(product: string | { id: string } | null | unde
 async function ensurePlanProduct(plan: SubscriptionPlanId) {
     const id = `${PLAN_PRODUCT_PREFIX}${plan}`;
 
+    const name = `VoiceJP+ ${SUBSCRIPTION_PLANS[plan].name}プラン`;
+
     try {
-        await stripe.products.retrieve(id);
+        const product = await stripe.products.retrieve(id);
+        // 名前を変えたときは、すでにある商品の名前も合わせる
+        if (product.name !== name) await stripe.products.update(id, { name });
     } catch (error) {
         if (!(error instanceof Stripe.errors.StripeInvalidRequestError && error.code === "resource_missing")) throw error;
-        await stripe.products.create({ id, "name": `VoiceJP ${SUBSCRIPTION_PLANS[plan].name}プラン`, "metadata": { plan } });
+        await stripe.products.create({ id, name, "metadata": { plan } });
     }
 
     return id;
@@ -98,7 +102,7 @@ export async function createTopupCheckout(guildId: string, pack: TopupPackId) {
             "price_data": {
                 "currency": "jpy",
                 "unit_amount": yen,
-                "product_data": { "name": `VoiceJP クレジット ${credits.toLocaleString("ja-JP")}` }
+                "product_data": { "name": `VoiceJP+ クレジット ${credits.toLocaleString("ja-JP")}` }
             },
             "quantity": 1
         }],

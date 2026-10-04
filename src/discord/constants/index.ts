@@ -1,13 +1,20 @@
 // VoiceJP Discord Constants
 
 import {
-    ChannelType, Colors, GatewayIntentBits, InteractionContextType, SlashCommandBuilder
+    ChannelType, Colors, GatewayIntentBits, InteractionContextType, PermissionFlagsBits,
+    SlashCommandBuilder
 } from "discord.js";
 
 import type { ClientOptions } from "discord.js";
 
 export const LOCALE = "ja-JP";
 export const EMBED_COLOR = Colors.DarkBlue;
+
+export const ENGINE_LABELS = { "FREE": "標準 (無料)", "PLUS": "VoiceJP+" } as const;
+const ENGINE_CHOICES = [
+    { "name": ENGINE_LABELS.FREE, "value": "FREE" },
+    { "name": ENGINE_LABELS.PLUS, "value": "PLUS" }
+];
 
 export const AUDIO_SAMPLE_RATE = 48000;
 export const AUDIO_CHANNELS = 1;
@@ -48,9 +55,26 @@ export const commands = [
         .setContexts(InteractionContextType.Guild)
         .setDescription("Botをボイスチャンネルから退出させます。"),
     new SlashCommandBuilder()
+        .setName("engine")
+        .setContexts(InteractionContextType.Guild)
+        .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+        .setDescription("読み上げと文字起こしで使うエンジンを選びます。")
+        .addStringOption(option =>
+            option
+                .setName("synthesis")
+                .setDescription("読み上げのエンジン")
+                .addChoices(...ENGINE_CHOICES)
+        )
+        .addStringOption(option =>
+            option
+                .setName("recognition")
+                .setDescription("文字起こしのエンジン")
+                .addChoices(...ENGINE_CHOICES)
+        ),
+    new SlashCommandBuilder()
         .setName("record")
         .setContexts(InteractionContextType.Guild)
-        .setDescription("通話の録音と自動文字起こしを行います(月額プランの特典)。")
+        .setDescription("通話の録音と自動文字起こしを行います (VoiceJP+ 月額プランの特典)。")
         .addSubcommand(subcommand =>
             subcommand
                 .setName("start")

@@ -3,9 +3,11 @@
 import express from "express";
 
 import requireSession from "../middlewares/auth.ts";
+import summarizeGuilds from "../utils/guild-summary.ts";
 import { fetchManageableGuilds } from "../utils/guilds.ts";
 import billingRouter from "./billing.ts";
 import recordingsRouter from "./recordings.ts";
+import settingsRouter from "./settings.ts";
 
 const router = express.Router();
 
@@ -19,10 +21,12 @@ router.get("/me", requireSession, (req, res) => {
 });
 
 router.get("/guilds", requireSession, async (req, res) => {
-    res.json({ "status": "ok", "guilds": await fetchManageableGuilds(res.locals.session.user.id, req.headers) });
+    const guilds = await fetchManageableGuilds(res.locals.session.user.id, req.headers);
+    res.json({ "status": "ok", "guilds": await summarizeGuilds(guilds) });
 });
 
 router.use(billingRouter);
 router.use(recordingsRouter);
+router.use(settingsRouter);
 
 export default router;

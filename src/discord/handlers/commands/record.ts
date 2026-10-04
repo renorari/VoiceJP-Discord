@@ -42,7 +42,7 @@ export async function handleRecordStartCommand(client: Client, interaction: Chat
     }
 
     if (!await isSubscribed(guildId)) {
-        await replyEphemeral(interaction, `録音は、月額プランに加入しているサーバーで使えます。\n${BASE_URL}/dashboard/?guild=${guildId}`);
+        await replyEphemeral(interaction, `録音は、VoiceJP+ の月額プランに加入しているサーバーで使えます。\n${BASE_URL}/dashboard/?guild=${guildId}`);
         return;
     }
 

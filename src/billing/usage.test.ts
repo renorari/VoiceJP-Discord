@@ -12,7 +12,8 @@ const INITIAL_CREDITS = 100;
 
 process.env.OPENAI_API_KEY = "sk-test";
 const { default: prisma } = await import("../db/prisma.ts");
-const { chargeSpeech, chargeTranscription, hasCredits } = await import("./usage.ts");
+const { chargeSpeech, chargeTranscription, hasCredits, shouldUsePlus } = await import("./usage.ts");
+const { updateEngineSettings } = await import("./settings.ts");
 
 after(async () => {
     if (skip) return;
@@ -42,4 +43,20 @@ test("読み上げと文字起こしの使用量だけクレジットが減る",
 test("使い切ったら文字起こしが true (切り替え合図) を返す", { skip }, async () => {
     assert.equal(await chargeTranscription(guildId, 600, "member"), true);
     assert.equal(await hasCredits(guildId), false);
+});
+
+test("VoiceJP+ を選んでいて、クレジットがあるときだけ有料のエンジンを使う", { skip }, async () => {
+    const id = `${guildId}-engine`;
+
+    // クレジットがなければ、VoiceJP+ を選んでいても使わない
+    assert.equal(await shouldUsePlus(id, "synthesis"), false);
+
+    await grantCredits({ "guildId": id, "amount": 100, "type": "TOPUP" });
+    assert.equal(await shouldUsePlus(id, "synthesis"), true);
+    assert.equal(await shouldUsePlus(id, "recognition"), true);
+
+    // 標準を選ぶと、クレジットがあっても使わない (読み上げと文字起こしは別々)
+    await updateEngineSettings(id, { "synthesisEngine": "FREE" });
+    assert.equal(await shouldUsePlus(id, "synthesis"), false);
+    assert.equal(await shouldUsePlus(id, "recognition"), true);
 });

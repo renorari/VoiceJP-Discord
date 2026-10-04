@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="color-scheme" content="light dark">
     <meta name="robots" content="noindex">
-    <title>VoiceJP | ダッシュボード</title>
+    <title>VoiceJP+ | ダッシュボード</title>
     <link rel="icon" href="/favicon.ico">
     <link rel="stylesheet" href="/vendor/sashimi-ui/default.theme.css">
     <link rel="stylesheet" href="/vendor/sashimi-ui/bundle.css">
@@ -30,7 +30,7 @@
         <section id="view-login" class="view" hidden>
             <hgroup class="hero">
                 <h1>通話を、もっと使いやすく。</h1>
-                <p>クレジットを追加すると、文字起こしと読み上げが高精度なAIに切り替わります。</p>
+                <p>VoiceJP+ (ボイスジェーピー・プラス) にすると、文字起こしと読み上げが高精度なAIに切り替わります。</p>
             </hgroup>
             <ul class="feature-list">
                 <li>サーバーごとに、必要な分だけ</li>
@@ -46,6 +46,9 @@
                 <h1>サーバーを選ぶ</h1>
                 <p>「サーバー管理」権限のあるサーバーが表示されます。</p>
             </hgroup>
+            <h2 id="guild-plus-title" class="group-title" hidden>VoiceJP+ を使っているサーバー</h2>
+            <ul id="guild-list-plus" class="list" hidden></ul>
+            <h2 id="guild-other-title" class="group-title" hidden>ほかのサーバー</h2>
             <ul id="guild-list" class="list"></ul>
             <p id="guild-empty" class="helper-text" hidden>管理できるサーバーがありません。</p>
         </section>
@@ -62,8 +65,9 @@
             <div id="status" class="callout"></div>
 
             <div class="summary">
-                <p class="label">クレジット残高</p>
+                <p class="label">VoiceJP+ クレジット残高</p>
                 <p id="credits" class="credits"></p>
+                <dl id="plan-summary" class="key-value plan-summary" hidden></dl>
                 <dl class="key-value">
                     <dt>文字起こし</dt>
                     <dd id="estimate-transcription"></dd>
@@ -71,6 +75,21 @@
                     <dd id="estimate-speech"></dd>
                 </dl>
                 <p class="helper-text">目安です。どちらか一方だけを使った場合の量で、両方使うと合計で消費されます。</p>
+            </div>
+
+            <div class="summary engines">
+                <h2>使うエンジン</h2>
+                <label class="label" for="engine-synthesis">読み上げ</label>
+                <select id="engine-synthesis" class="select" data-setting="synthesisEngine">
+                    <option value="PLUS">VoiceJP+ (高精度・クレジットを使います)</option>
+                    <option value="FREE">標準 (無料)</option>
+                </select>
+                <label class="label" for="engine-recognition">文字起こし</label>
+                <select id="engine-recognition" class="select" data-setting="recognitionEngine">
+                    <option value="PLUS">VoiceJP+ (高精度・クレジットを使います)</option>
+                    <option value="FREE">標準 (無料)</option>
+                </select>
+                <p class="helper-text">VoiceJP+ を選んでいても、クレジットが無いときは標準 (無料) が使われます。Discordの <code>/engine</code> でも変更できます。</p>
             </div>
 
             <div class="tabs" role="tablist" aria-label="メニュー">
@@ -81,8 +100,7 @@
             </div>
 
             <div id="panel-plans" role="tabpanel" aria-labelledby="tab-plans">
-                <p class="helper-text">毎月クレジットが付与されます。使い切れなかった分は翌月に繰り越されます。月額プランの特典として、通話の録音と自動文字起こし (<code>/record</code>) も使えます。</p>
-                <dl id="subscription-info" class="key-value info" hidden></dl>
+                <p class="helper-text">VoiceJP+ の月額プランでは、毎月クレジットが付与されます。使い切れなかった分は翌月に繰り越されます。特典として、通話の録音と自動文字起こし (<code>/record</code>) も使えます。</p>
                 <div id="plans" class="cards"></div>
                 <p class="helper-text">プランの変更は、次回の更新日から反映されます。解約や支払い方法の変更は「支払いの管理」から行えます。</p>
             </div>
@@ -94,12 +112,12 @@
 
             <div id="panel-recordings" role="tabpanel" aria-labelledby="tab-recordings" hidden>
                 <div id="recordings-promo" class="callout info" hidden>
-                    <p>月額プランに加入すると、通話の録音と自動文字起こしが使えます。</p>
+                    <p>VoiceJP+ の月額プランに加入すると、通話の録音と自動文字起こしが使えます。</p>
                     <button id="to-plans" class="button compact" type="button">プランを見る</button>
                 </div>
                 <p id="recordings-empty" class="helper-text" hidden>まだ録音がありません。通話に参加した状態で <code>/record start</code> を実行すると、録音と自動文字起こしが始まります。</p>
                 <div id="recordings" class="cards"></div>
-                <p class="helper-text">録音と文字起こしは、30日後に自動で削除されます。文字起こしにはクレジットを使います (無くなると標準の文字起こしに切り替わります)。</p>
+                <p class="helper-text">録音と文字起こしは、30日後に自動で削除されます。文字起こしには VoiceJP+ のクレジットを使います (無くなると標準の文字起こしに切り替わります)。</p>
             </div>
 
             <div id="panel-history" role="tabpanel" aria-labelledby="tab-history" hidden>

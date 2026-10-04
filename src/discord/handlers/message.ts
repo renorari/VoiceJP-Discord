@@ -1,11 +1,13 @@
 // Message create event
 
-import { chargeSpeech, hasCredits } from "#billing/usage.ts";
+import { chargeSpeech, shouldUsePlus } from "#billing/usage.ts";
 import log from "#utils/logger.ts";
 import { synthesizeSpeechWithOpenAI } from "#utils/openai.ts";
 import synthesizeSpeech from "#utils/speech.ts";
 
-import { createAudioResource } from "@discordjs/voice";
+import fs from "node:fs/promises";
+
+import { AudioPlayerStatus, createAudioResource } from "@discordjs/voice";
 
 import type { Message, OmitPartialGroupDMChannel } from "discord.js";
 import type { State } from "../types.ts";
@@ -15,9 +17,9 @@ const CONTENT_LIMIT = 200;
 
 const logger = log.getLogger("discord");
 
-// クレジットが残っていれば OpenAI、なければ (または失敗したら) Open JTalk で読み上げる
+// VoiceJP+ を選んでいてクレジットがあれば OpenAI、そうでなければ (または失敗したら) Open JTalk で読み上げる
 async function synthesize(guildId: string, text: string) {
-    if (await hasCredits(guildId)) {
+    if (await shouldUsePlus(guildId, "synthesis")) {
         try {
             const wavPath = await synthesizeSpeechWithOpenAI(text);
             await chargeSpeech(guildId, text.length).catch(error => logger.error(error));
@@ -42,7 +44,11 @@ export default async function handleMessageCreateEvent(message: OmitPartialGroup
     const text = `${username.slice(0, USERNAME_LIMIT)}、${message.content.slice(0, CONTENT_LIMIT)}`;
 
     try {
-        channel.player.play(createAudioResource(await synthesize(message.guildId, text)));
+        const wavPath = await synthesize(message.guildId, text);
+        channel.player.play(createAudioResource(wavPath));
+
+        // メッセージの内容が入った音声なので、読み上げが終わったら (止められたときも) ファイルを残さない
+        channel.player.once(AudioPlayerStatus.Idle, () => fs.rm(wavPath, { "force": true }).catch(error => logger.error(error)));
     } catch (error) {
         logger.error(error);
     }

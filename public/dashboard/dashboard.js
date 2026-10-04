@@ -15,16 +15,17 @@ const RECORDING_STATUS_LABELS = {
 };
 const PANELS = ["plans", "topup", "recordings", "history"];
 const MESSAGES = {
-    "standard": "標準モード (無料) で動作しています。クレジットを追加すると、高精度なAIの文字起こしと読み上げが使えます。",
-    "low": "クレジットが残りわずかです。無くなると、自動で標準モード (無料) に切り替わります。",
-    "premium": "高精度モードが有効です。このサーバーの文字起こしと読み上げは、AIで処理されます。",
+    "standard": "標準 (無料) で動作しています。VoiceJP+ のクレジットを追加すると、AIによる高精度な文字起こしと読み上げが使えます。",
+    "chosenFree": "標準 (無料) を使うように設定されています。VoiceJP+ にするには、下の「使うエンジン」を変更してください。",
+    "low": "VoiceJP+ のクレジットが残りわずかです。無くなると、自動で標準 (無料) に切り替わります。",
+    "premium": "VoiceJP+ が有効です。このサーバーの文字起こしと読み上げは、AIで処理されます。",
     "paid": "お支払いありがとうございます。反映されるまで少しかかることがあります。コンビニ払いなどは、支払いの完了後に反映されます。",
     "pastDue": "お支払いに失敗しています。「支払いの管理」から支払い方法を更新してください。"
 };
 
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
-const state = { "user": null, "guilds": [], "plans": null, "guild": null, "billing": null, "recordings": [] };
+const state = { "user": null, "guilds": [], "plans": null, "guild": null, "billing": null, "recordings": [], "settings": { "synthesisEngine": "PLUS", "recognitionEngine": "PLUS" } };
 
 // --- 基本の部品 ---
 
@@ -137,24 +138,67 @@ function isSubscribed() {
 
 // --- 画面の描画 ---
 
+function guildRow(guild) {
+    const { subscribed, plan, credits } = guild.plus;
+    const planName = state.plans.subscriptionPlans[plan]?.name;
+    const badges = h("span", { "className": "badges" },
+        subscribed ? h("span", { "className": "chip active", "textContent": planName ? `${planName}プラン` : "加入中" }) : "",
+        credits > 0 ? h("span", { "textContent": `残高 ${number(credits)}` }) : ""
+    );
+
+    const button = h("button", { "type": "button" },
+        guildIcon(guild),
+        h("span", { "className": "name", "textContent": guild.name }),
+        badges,
+        h("span", { "className": "chevron", "textContent": "›" })
+    );
+    button.querySelector(".chevron").setAttribute("aria-hidden", "true");
+    button.addEventListener("click", () => selectGuild(guild.id));
+
+    return h("li", {}, button);
+}
+
+// 月額プランに加入中、またはクレジットがあるサーバーを上にまとめる (並び順はサーバー側で決まっている)
 function renderGuildList() {
-    const list = $("guild-list");
-    list.replaceChildren(...state.guilds.map(guild => {
-        const button = h("button", { "type": "button" },
-            guildIcon(guild),
-            h("span", { "className": "name", "textContent": guild.name }),
-            h("span", { "className": "chevron", "textContent": "›" })
-        );
-        button.querySelector(".chevron").setAttribute("aria-hidden", "true");
-        button.addEventListener("click", () => selectGuild(guild.id));
-        return h("li", {}, button);
-    }));
+    const used = state.guilds.filter(guild => guild.plus.subscribed || guild.plus.credits > 0);
+    const others = state.guilds.filter(guild => !used.includes(guild));
+
+    $("guild-list-plus").replaceChildren(...used.map(guildRow));
+    $("guild-list").replaceChildren(...others.map(guildRow));
+
+    $("guild-list-plus").hidden = used.length === 0;
+    $("guild-plus-title").hidden = used.length === 0;
+    $("guild-other-title").hidden = used.length === 0 || others.length === 0;
+    $("guild-list").hidden = others.length === 0;
     $("guild-empty").hidden = state.guilds.length > 0;
+}
+
+// 加入中のプランと更新日を、残高のすぐ近くに出す
+function renderPlanSummary() {
+    const { subscription } = state.billing;
+    const plan = state.plans.subscriptionPlans[subscription.plan];
+    const summary = $("plan-summary");
+
+    if (!isSubscribed() || !plan) {
+        summary.hidden = true;
+        return;
+    }
+
+    const rows = [
+        ["加入中のプラン", `${plan.name} (月 ${yen(plan.yen)})`],
+        ["次回の更新日", subscription.currentPeriodEnd ? formatDate(subscription.currentPeriodEnd) : "-"]
+    ];
+    summary.replaceChildren(...rows.flatMap(([key, value]) => [h("dt", { "textContent": key }), h("dd", { "textContent": value })]));
+    summary.hidden = false;
 }
 
 function renderStatus() {
     const { credits, subscription } = state.billing;
-    const [type, message] = credits <= 0 ? ["info", MESSAGES.standard] : credits <= LOW_CREDITS ? ["warning", MESSAGES.low] : ["success", MESSAGES.premium];
+    const bothFree = state.settings.synthesisEngine === "FREE" && state.settings.recognitionEngine === "FREE";
+    const [type, message] = credits <= 0 ? ["info", MESSAGES.standard]
+        : bothFree ? ["info", MESSAGES.chosenFree]
+        : credits <= LOW_CREDITS ? ["warning", MESSAGES.low]
+        : ["success", MESSAGES.premium];
 
     $("status").className = `callout ${type}`;
     $("status").textContent = message;
@@ -169,24 +213,6 @@ function renderSummary() {
     $("credits").textContent = number(credits);
     $("estimate-transcription").textContent = rates.transcription;
     $("estimate-speech").textContent = rates.speech;
-}
-
-function renderSubscriptionInfo() {
-    const { subscription } = state.billing;
-    const info = $("subscription-info");
-    const plan = state.plans.subscriptionPlans[subscription.plan];
-
-    if (!isSubscribed() || !plan) {
-        info.hidden = true;
-        return;
-    }
-
-    const rows = [
-        ["加入中のプラン", `${plan.name} (月 ${yen(plan.yen)})`],
-        ["次回の更新日", subscription.currentPeriodEnd ? formatDate(subscription.currentPeriodEnd) : "-"]
-    ];
-    info.replaceChildren(...rows.flatMap(([key, value]) => [h("dt", { "textContent": key }), h("dd", { "textContent": value })]));
-    info.hidden = false;
 }
 
 function planCard(id, plan) {
@@ -312,17 +338,25 @@ function renderHistory() {
     $("history-empty").hidden = transactions.length > 0;
 }
 
+function renderEngines() {
+    for (const select of document.querySelectorAll("[data-setting]")) select.value = state.settings[select.dataset.setting];
+}
+
 function renderBilling() {
     $("guild-icon-slot").replaceChildren(guildIcon(state.guild, true));
     $("guild-name").textContent = state.guild.name;
 
     renderStatus();
     renderSummary();
-    renderSubscriptionInfo();
-    $("plans").replaceChildren(...Object.entries(state.plans.subscriptionPlans).map(([id, plan]) => planCard(id, plan)));
+    renderPlanSummary();
+    // 加入中のプランを先頭にする
+    const { plan: currentPlan } = state.billing.subscription;
+    const planEntries = Object.entries(state.plans.subscriptionPlans).sort(([a], [b]) => Number(b === currentPlan && isSubscribed()) - Number(a === currentPlan && isSubscribed()));
+    $("plans").replaceChildren(...planEntries.map(([id, plan]) => planCard(id, plan)));
     $("packs").replaceChildren(...Object.entries(state.plans.topupPacks).map(([id, pack]) => packCard(id, pack)));
     renderHistory();
     renderRecordings();
+    renderEngines();
 }
 
 function showPanel(name) {
@@ -340,7 +374,12 @@ function showPanel(name) {
 async function loadBilling() {
     // 支払い直後やコンビニ払いの完了を反映するため、Stripe の最新の状態を取り込んでから表示する
     await post(`/guilds/${state.guild.id}/billing/sync`);
-    [state.billing, { "recordings": state.recordings }] = await Promise.all([api(`/guilds/${state.guild.id}/billing`), api(`/guilds/${state.guild.id}/recordings`)]);
+    const [billing, { recordings }, settings] = await Promise.all([
+        api(`/guilds/${state.guild.id}/billing`),
+        api(`/guilds/${state.guild.id}/recordings`),
+        api(`/guilds/${state.guild.id}/settings`)
+    ]);
+    Object.assign(state, { billing, recordings, "settings": { "synthesisEngine": settings.synthesisEngine, "recognitionEngine": settings.recognitionEngine } });
     renderBilling();
 }
 
@@ -390,6 +429,23 @@ function bindEvents() {
         await post("/auth/sign-out");
         location.href = "/dashboard/";
     }));
+    for (const select of document.querySelectorAll("[data-setting]")) {
+        select.addEventListener("change", async () => {
+            const key = select.dataset.setting;
+            try {
+                state.settings = { ...state.settings, ...await api(`/guilds/${state.guild.id}/settings`, {
+                    "method": "PUT",
+                    "headers": { "Content-Type": "application/json" },
+                    "body": JSON.stringify({ [key]: select.value })
+                }) };
+                renderStatus();
+            } catch (error) {
+                notice("destructive", error.message);
+            } finally {
+                renderEngines();
+            }
+        });
+    }
     $("to-plans").addEventListener("click", () => showPanel("plans"));
     $("portal").addEventListener("click", event => run(event.currentTarget, () => redirectTo(`/guilds/${state.guild.id}/portal`)));
     $("back").addEventListener("click", () => {

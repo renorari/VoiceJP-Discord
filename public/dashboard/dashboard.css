@@ -237,6 +237,29 @@ hgroup p {
     color: var(--sui-color-neutral-secondary);
 }
 
+.group-title {
+    margin: 20px 0 8px;
+    font-size: .875rem;
+    font-weight: 600;
+    color: var(--sui-color-neutral-secondary);
+}
+
+.list .badges {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    font-size: .8125rem;
+    color: var(--sui-color-neutral-secondary);
+}
+
+.plan-summary {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--separator);
+}
+
 /* サーバーの画面 */
 .back {
     margin-block: 16px 0;
@@ -275,6 +298,17 @@ hgroup p {
 
 .key-value dd {
     font-variant-numeric: tabular-nums;
+}
+
+/* 使うエンジン */
+.engines .select {
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.engines .label {
+    display: block;
+    margin-bottom: 4px;
 }
 
 /* タブ */

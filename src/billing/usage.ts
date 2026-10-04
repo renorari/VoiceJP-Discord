@@ -3,6 +3,7 @@
 import log from "#utils/logger.ts";
 import { IS_OPENAI_CONFIGURED } from "#utils/openai.ts";
 import { consumeCredits, getBalance, speechCost, transcriptionCost } from "./credits.ts";
+import { getEngineSettings } from "./settings.ts";
 
 const IS_DATABASE_CONFIGURED = Boolean(process.env.DATABASE_URL);
 
@@ -18,6 +19,14 @@ export async function hasCredits(guildId: string) {
         logger.error(error);
         return false;
     }
+}
+
+// VoiceJP+ を選んでいて、クレジットもあるときだけ有料のエンジンを使う
+export async function shouldUsePlus(guildId: string, kind: "synthesis" | "recognition") {
+    const settings = await getEngineSettings(guildId);
+    const engine = kind === "synthesis" ? settings.synthesisEngine : settings.recognitionEngine;
+
+    return engine === "PLUS" && await hasCredits(guildId);
 }
 
 export async function chargeSpeech(guildId: string, characters: number) {
