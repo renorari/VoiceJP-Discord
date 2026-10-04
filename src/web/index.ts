@@ -5,6 +5,7 @@ import "dotenv/config";
 import { startSubscriptionSync } from "#billing/stripe-sync.ts";
 import log from "#utils/logger.ts";
 import { toNodeHandler } from "better-auth/node";
+import compression from "compression";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
@@ -16,6 +17,8 @@ import logMiddleware from "./middlewares/log.ts";
 
 const PUBLIC_DIR = "public";
 const SASHIMI_UI_DIR = "node_modules/sashimi-ui/dist/css";
+const IMAGE_MAX_AGE = 7 * 24 * 60 * 60;
+const CACHEABLE_FILE_PATTERN = /\.(webp|png|jpg|svg|ico)$/;
 const STRICT_PATHS = ["/dashboard", "/api", "/vendor"];
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const PORT = parseInt(process.env.PORT || "3000", 10);
@@ -43,6 +46,7 @@ const siteHelmet = helmet({
 });
 
 app.use((req, res, next) => (STRICT_PATHS.some(path => req.path.startsWith(path)) ? strictHelmet : siteHelmet)(req, res, next));
+app.use(compression());
 app.use(cors());
 app.use(logMiddleware(log.getLogger("access")));
 
@@ -53,7 +57,12 @@ app.use(express.json());
 app.use(express.urlencoded({ "extended": true }));
 
 app.use("/vendor/sashimi-ui", express.static(SASHIMI_UI_DIR));
-app.use(express.static(PUBLIC_DIR));
+app.use(express.static(PUBLIC_DIR, {
+    // 画像は長く、HTML・CSS・JS は毎回確認 (変更があったときだけ再取得) させる
+    "setHeaders": (res, filePath) => {
+        res.setHeader("Cache-Control", CACHEABLE_FILE_PATTERN.test(filePath) ? `public, max-age=${IMAGE_MAX_AGE}` : "no-cache");
+    }
+}));
 
 app.use("/api", apiRouter);
 

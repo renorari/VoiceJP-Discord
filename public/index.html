@@ -19,6 +19,8 @@
     <meta name="google-adsense-account" content="ca-pub-1265980632516511">
     <title>VoiceJP | 日本語通話専用Discordアプリ</title>
     <link rel="icon" href="/favicon.ico">
+    <link rel="preload" as="image" href="/images/header-960.webp" type="image/webp" media="(max-width: 960px)" fetchpriority="high">
+    <link rel="preload" as="image" href="/images/header-1920.webp" type="image/webp" media="(min-width: 961px)" fetchpriority="high">
     <link rel="stylesheet" href="/styles/main.css">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1265980632516511"
         crossorigin="anonymous"></script>
@@ -53,15 +55,15 @@
             </div>
             <div class="cards">
                 <div class="card card-3 arrow-down">
-                    <img src="/icons/text_to_speech_FILL0_wght200_GRAD0_opsz24.svg" alt="Text To Speech Icon">
+                    <img src="/icons/text_to_speech_FILL0_wght200_GRAD0_opsz24.svg" alt="" width="48" height="48">
                     声が出せないけど通話したい
                 </div>
                 <div class="card card-3 arrow-down">
-                    <img src="/icons/live_help_FILL0_wght200_GRAD0_opsz24.svg" alt="Live Help Icon">
+                    <img src="/icons/live_help_FILL0_wght200_GRAD0_opsz24.svg" alt="" width="48" height="48">
                     通話はできないけど、話に参加したい
                 </div>
                 <div class="card card-3 arrow-down">
-                    <img src="/icons/speech_to_text_FILL0_wght200_GRAD0_opsz24.svg" alt="Speech To Text Icon">
+                    <img src="/icons/speech_to_text_FILL0_wght200_GRAD0_opsz24.svg" alt="" width="48" height="48">
                     通話で話したことを文字に起こしたい
                 </div>
             </div>
@@ -98,6 +100,7 @@
                         この機能を使うことで、通話で声が出せない人でも通話に参加することができます。
                     </p>
                 </div>
+            </div>
         </section>
         <section>
             <div class="section-head">
@@ -131,6 +134,22 @@
                 <a href="/howtouse/" class="button">使い方を見る</a>
             </div>
         </section>
+        <section id="plans">
+            <div class="section-head">
+                <h2>無料で使えて、もっと高精度にもできる</h2>
+                <p>
+                    基本の機能は無料です。クレジットを追加したサーバーでは、AIによる高精度な文字起こしと読み上げが使えます。
+                </p>
+            </div>
+            <h3 class="plans-title">月額プラン</h3>
+            <div class="cards plans" id="plan-list"></div>
+            <h3 class="plans-title">クレジットを追加購入</h3>
+            <div class="cards plans" id="pack-list"></div>
+            <p class="note">
+                金額は税込です。クレジットが無くなっても、無料の標準モードで使い続けられます。購入と管理は
+                <a href="/dashboard/">ダッシュボード</a>から行えます。
+            </p>
+        </section>
         <section>
             <div class="section-head">
                 <h2 class="big">VoiceJPと一緒に 通話を楽しみましょう</h2>
@@ -159,6 +178,7 @@
             </ul>
         </div>
     </footer>
+    <script src="/scripts/plans.js" defer></script>
 </body>
 
 </html>
